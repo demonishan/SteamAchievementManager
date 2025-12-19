@@ -27,7 +27,6 @@ namespace SAM.Picker.Modern {
         private bool _WantJunk = false;
         private System.Windows.Threading.DispatcherTimer _CallbackTimer;
         private ICollectionView _AchievementView;
-        private ListSortDirection? _currentSortDirection = null;
         public MainWindow() {
             InitializeComponent();
             _SteamClient = new Client();
@@ -38,7 +37,7 @@ namespace SAM.Picker.Modern {
                 Close();
                 return;
             }
-            GameList.ItemsSource = _FilteredGames;
+            GamesList.ItemsSource = _FilteredGames;
             SearchBox.TextChanged += (s, e) => RefreshFilter();
             this.StateChanged += OnWindowStateChanged;
             _CallbackTimer = new System.Windows.Threading.DispatcherTimer();
@@ -104,6 +103,7 @@ namespace SAM.Picker.Modern {
         private void RefreshFilter() {
             if (SearchBox == null) return;
             var searchText = SearchBox.Text.ToLower(CultureInfo.InvariantCulture);
+            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Collapsed : Visibility.Visible;
             var filtered = _AllGames.Where(g =>
                 (string.IsNullOrEmpty(searchText) || g.Name.ToLower(CultureInfo.InvariantCulture).Contains(searchText)) &&
                 ((g.Type == "normal" && _WantGames) ||
@@ -136,8 +136,6 @@ namespace SAM.Picker.Modern {
             _AchievementView = CollectionViewSource.GetDefaultView(_Achievements);
             AchievementList.ItemsSource = _AchievementView;
             AchievementFilter.SelectedIndex = 0;
-            _currentSortDirection = null;
-            if (SortIcon != null) SortIcon.Data = (Geometry)FindResource("Icon.SortAz");
             _Achievements.Clear();
             SelectedGameInfo.Text = "Loading achievements...";
             LoadingOverlay.Visibility = Visibility.Visible;
@@ -173,6 +171,7 @@ namespace SAM.Picker.Modern {
 
             var steamId = _SteamClient.SteamUser.GetSteamId();
             _SteamClient.SteamUserStats.RequestUserStats(steamId);
+            _SteamClient.SteamUserStats.RequestGlobalAchievementPercentages();
             DetailsStatus.Text = "Requesting stats from Steam...";
         }
         private void FetchAchievements() {
@@ -183,12 +182,14 @@ namespace SAM.Picker.Modern {
             _Achievements.Clear();
             foreach (var def in definitions) {
                 if (_SteamClient.SteamUserStats.GetAchievementAndUnlockTime(def.Id, out bool isAchieved, out uint unlockTime)) {
+                    _SteamClient.SteamUserStats.GetAchievementAchievedPercent(def.Id, out float globalPercent);
                     var avm = new AchievementViewModel {
                         Id = def.Id,
                         Name = def.Name,
                         Description = def.Description,
                         IsAchieved = isAchieved,
                         UnlockTime = isAchieved && unlockTime > 0 ? (DateTime?)DateTimeOffset.FromUnixTimeSeconds(unlockTime).LocalDateTime : null,
+                        GlobalPercent = globalPercent,
                         IconUrl = $"https://cdn.steamstatic.com/steamcommunity/public/images/apps/{_SelectedGameId}/{(isAchieved ? def.IconNormal : def.IconLocked)}"
                     };
                     // Load icon asynchronously
@@ -220,42 +221,52 @@ namespace SAM.Picker.Modern {
         }
 
         private void Sort_Click(object sender, RoutedEventArgs e) {
+            if (SortButton.ContextMenu != null) {
+                SortButton.ContextMenu.PlacementTarget = SortButton;
+                SortButton.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void SortOption_Click(object sender, RoutedEventArgs e) {
             if (_AchievementView == null) return;
+            var menuItem = sender as MenuItem;
+            if (menuItem == null) return;
+
+            string tag = menuItem.Tag?.ToString();
+            if (string.IsNullOrEmpty(tag)) return;
 
             _AchievementView.SortDescriptions.Clear();
-
-            if (_currentSortDirection == null) {
-                _currentSortDirection = ListSortDirection.Ascending;
-                SortIcon.Data = (Geometry)FindResource("Icon.SortAz");
-            } else if (_currentSortDirection == ListSortDirection.Ascending) {
-                _currentSortDirection = ListSortDirection.Descending;
-                SortIcon.Data = (Geometry)FindResource("Icon.SortZa");
-            } else {
-                _currentSortDirection = null;
-                SortIcon.Data = (Geometry)FindResource("Icon.SortAz");
-                _AchievementView.Refresh();
-                return;
+            
+            if (tag == "Name_Asc") {
+                _AchievementView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
+            } else if (tag == "Name_Desc") {
+                _AchievementView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Descending));
+            } else if (tag == "Rarity_Asc") {
+                _AchievementView.SortDescriptions.Add(new SortDescription("GlobalPercent", ListSortDirection.Ascending));
+            } else if (tag == "Rarity_Desc") {
+                _AchievementView.SortDescriptions.Add(new SortDescription("GlobalPercent", ListSortDirection.Descending));
             }
-
-            _AchievementView.SortDescriptions.Add(new SortDescription("Name", _currentSortDirection.Value));
+            
             _AchievementView.Refresh();
         }
 
-        private void BulkActions_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (BulkActions == null || BulkActions.SelectedIndex <= 0) return;
-
-            var selected = (ComboBoxItem)BulkActions.SelectedItem;
-            if (selected == null) return;
-
-            string action = selected.Tag?.ToString();
-            bool targetState = action == "unlock_all";
-
-            foreach (var ach in _Achievements) {
-                ach.IsAchieved = targetState;
+        private void BulkAction_Click(object sender, RoutedEventArgs e) {
+            if (sender is Button btn && btn.ContextMenu != null) {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.IsOpen = true;
             }
+        }
 
-            // Reset back to "Bulk Actions" label
-            BulkActions.SelectedIndex = 0;
+        private void UnlockAll_Click(object sender, RoutedEventArgs e) {
+            foreach (var ach in _Achievements) {
+                ach.IsAchieved = true;
+            }
+        }
+
+        private void LockAll_Click(object sender, RoutedEventArgs e) {
+            foreach (var ach in _Achievements) {
+                ach.IsAchieved = false;
+            }
         }
         private async void LoadIcon(AchievementViewModel vm) {
             try {
@@ -345,6 +356,7 @@ namespace SAM.Picker.Modern {
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
         private void Refresh_Click(object sender, RoutedEventArgs e) {
             _AllGames.Clear();
+            HomeLoadingOverlay.Visibility = Visibility.Visible;
             LoadData();
         }
         private void Filter_Click(object sender, RoutedEventArgs e) {
@@ -382,6 +394,7 @@ namespace SAM.Picker.Modern {
         public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public float GlobalPercent { get; set; }
         public string IconUrl { get; set; }
         public System.Windows.Media.ImageSource Icon { get; set; }
         private bool _IsAchieved;

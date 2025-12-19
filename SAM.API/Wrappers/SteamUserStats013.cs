@@ -190,6 +190,27 @@ namespace SAM.API.Wrappers
             return this.Call<CallHandle, NativeRequestUserStats>(this.Functions.RequestUserStats, this.ObjectAddress, steamIdUser);
         }
         #endregion
+        #region RequestGlobalAchievementPercentages
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate CallHandle NativeRequestGlobalAchievementPercentages(IntPtr self);
+        public CallHandle RequestGlobalAchievementPercentages()
+        {
+            return this.Call<CallHandle, NativeRequestGlobalAchievementPercentages>(this.Functions.RequestGlobalAchievementPercentages, this.ObjectAddress);
+        }
+        #endregion
+        #region GetAchievementAchievedPercent
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        private delegate bool NativeGetAchievementAchievedPercent(IntPtr self, IntPtr name, out float percent);
+        public bool GetAchievementAchievedPercent(string name, out float percent)
+        {
+            using (var nativeName = NativeStrings.StringToStringHandle(name))
+            {
+                var call = this.GetFunction<NativeGetAchievementAchievedPercent>(this.Functions.GetAchievementAchievedPercent);
+                return call(this.ObjectAddress, nativeName.Handle, out percent);
+            }
+        }
+        #endregion
         #region ResetAllStats
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         [return: MarshalAs(UnmanagedType.I1)]
