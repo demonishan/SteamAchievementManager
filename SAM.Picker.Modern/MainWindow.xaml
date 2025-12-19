@@ -1,4 +1,4 @@
-﻿<Window x:Class="SAM.Picker.Modern.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:SAM.Picker.Modern" mc:Ignorable="d" Title="SAM Reborn 2026" Height="700" Width="1000" WindowStyle="None" AllowsTransparency="True" Background="#1E1E1E" Foreground="White" FontFamily="Segoe UI Variable Display, Segoe UI, sans-serif" ResizeMode="CanResizeWithGrip">
+﻿<Window x:Class="SAM.Picker.Modern.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:SAM.Picker.Modern" mc:Ignorable="d" Title="SAM Reborn 2026" Height="700" Width="1000" WindowStyle="None" AllowsTransparency="True" Background="#1E1E1E" Foreground="White" FontFamily="Segoe UI Variable Display, Segoe UI, sans-serif" ResizeMode="CanResizeWithGrip" Icon="Resources/icon.png">
             <WindowChrome.WindowChrome>
                 <WindowChrome CaptionHeight="40" GlassFrameThickness="0" CornerRadius="0"/>
             </WindowChrome.WindowChrome>
@@ -213,7 +213,7 @@
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
                                             <Border Grid.Row="0" ClipToBounds="True" Height="117" Background="Black">
-                                                <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                                                <Image Source="{Binding Image}" Stretch="Uniform"/>
                                             </Border>
                                             <Border Grid.Row="1" Background="#2D2D30" MinHeight="50">
                                                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" Margin="10,8" Foreground="White" TextTrimming="None"/>
@@ -301,7 +301,7 @@
                                         <TextBlock x:Name="EnableTimerText" Text="Timer Mode" VerticalAlignment="Center" Margin="5,0"/>
                                     </StackPanel>
                                 </Button>
-                                <Button x:Name="RandomTimerButton" Margin="5,0,0,0" Style="{StaticResource ActionButtonStyle}" Width="40" Height="40" Click="RandomTimerButton_Click" Visibility="Collapsed" ToolTip="Generate Random Times">
+                                <Button x:Name="RandomTimerButton" Margin="5,0" Style="{StaticResource ActionButtonStyle}" Width="40" Height="40" Click="RandomTimerButton_Click" Visibility="Collapsed" ToolTip="Generate Random Times">
                                     <Path Data="{StaticResource Icon.Random}" Style="{StaticResource PathIconStyle}"/>
                                 </Button>
                                 <Popup x:Name="RandomTimerPopup" PlacementTarget="{Binding ElementName=RandomTimerButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
@@ -311,7 +311,6 @@
                                         </Border.Effect>
                                         <StackPanel>
                                             <TextBlock Text="Random Timer" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-
                                             <Grid Margin="0,5">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -327,18 +326,17 @@
                                                     <TextBox x:Name="RandMaxInput" Background="#333337" Foreground="White" BorderThickness="0" Padding="5" Text="60" HorizontalContentAlignment="Center"/>
                                                 </StackPanel>
                                             </Grid>
-
                                             <Button Content="Apply" Margin="0,15,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="ApplyRandomTimer_Click" Height="30"/>
                                         </StackPanel>
                                     </Border>
                                 </Popup>
-                                <Button x:Name="StartTimerButton" Margin="5,0,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Width="110" Height="40" Padding="15,0" Click="StartTimer_Click" Visibility="Collapsed">
+                                <Button x:Name="StartTimerButton" Margin="5,0" Style="{StaticResource PrimaryActionButtonStyle}" Width="110" Height="40" Padding="15,0" Click="StartTimer_Click" Visibility="Collapsed">
                                     <StackPanel Orientation="Horizontal">
                                         <Path x:Name="StartTimerIcon" Data="{StaticResource Icon.Play}" Style="{StaticResource PathIconStyle}" Margin="0,0,8,0"/>
                                         <TextBlock x:Name="StartTimerText" Text="Start timer" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button x:Name="SaveButton" Margin="5,0,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Height="40" MinWidth="100" Padding="15,0" Click="Store_Click">
+                                <Button x:Name="SaveButton" Margin="5,0" Style="{StaticResource PrimaryActionButtonStyle}" Height="40" MinWidth="100" Padding="15,0" Click="Store_Click">
                                     <StackPanel Orientation="Horizontal">
                                         <Path Data="{StaticResource Icon.Save}" Style="{StaticResource PathIconStyle}" Margin="0,0,8,0"/>
                                         <TextBlock Text="Save" VerticalAlignment="Center"/>

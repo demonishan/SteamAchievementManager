@@ -26,7 +26,7 @@ namespace SAM.Picker.Modern {
         private bool _WantMods = false;
         private bool _WantDemos = false;
         private bool _WantJunk = false;
-        private System.Windows.Threading.DispatcherTimer _CallbackTimer;
+        private DispatcherTimer _CallbackTimer;
         private ICollectionView _AchievementView;
         public MainWindow() {
             InitializeComponent();
@@ -41,7 +41,7 @@ namespace SAM.Picker.Modern {
             GamesList.ItemsSource = _FilteredGames;
             SearchBox.TextChanged += (s, e) => RefreshFilter();
             this.StateChanged += OnWindowStateChanged;
-            _CallbackTimer = new System.Windows.Threading.DispatcherTimer();
+            _CallbackTimer = new DispatcherTimer();
             _CallbackTimer.Interval = TimeSpan.FromMilliseconds(100);
             _CallbackTimer.Tick += (s, e) => _SteamClient.RunCallbacks(false);
             _CallbackTimer.Start();
@@ -58,6 +58,13 @@ namespace SAM.Picker.Modern {
             if (MaximizeBtn == null) return;
             MaximizeBtn.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
         }
+        protected override void OnClosed(EventArgs e) {
+            _CallbackTimer?.Stop();
+            _SteamClient?.Dispose();
+            SAM.API.Steam.Unload();
+            base.OnClosed(e);
+        }
+
         private async void LoadData() {
             await System.Threading.Tasks.Task.Run(() => FetchGames());
             Dispatcher.Invoke(() => RefreshFilter());
@@ -416,6 +423,7 @@ namespace SAM.Picker.Modern {
                 }
                 
                 RefreshFilter();
+                if (DetailsStatus != null) DetailsStatus.Text = "Drag and drop the achievements, set the delay in minutes, and click 'Start Timer'.";
             } else {
                 // Reset timer state when disabling
                 _IsTimerActive = false;
