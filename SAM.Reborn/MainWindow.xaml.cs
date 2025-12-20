@@ -34,8 +34,8 @@ namespace SAM.Picker.Modern {
       try {
         _SteamClient.Initialize(0);
       } catch (Exception ex) {
-        MessageBox.Show("Failed to initialize Steam: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        Close();
+        DisplayAlert("Failed to initialize Steam: " + ex.Message, true);
+        HomeLoadingOverlay.Visibility = Visibility.Collapsed;
         return;
       }
       GamesList.ItemsSource = _FilteredGames;
@@ -46,6 +46,11 @@ namespace SAM.Picker.Modern {
       _CallbackTimer.Tick += (s, e) => _SteamClient.RunCallbacks(false);
       _CallbackTimer.Start();
       LoadData();
+    }
+    private void DisplayAlert(string message, bool isError) {
+      var color = isError ? new SolidColorBrush(Color.FromRgb(232, 17, 35)) : new SolidColorBrush(Color.FromRgb(0, 122, 204));
+      if (HomeView.Visibility == Visibility.Visible) { HomeStatusText.Text = message; if (HomeStatusText.Parent is Border b) b.Background = color; }
+      else { GameStatusText.Text = message; if (GameStatusText.Parent is Border b) b.Background = color; }
     }
     internal class AchievementDefinition {
       public string Id { get; set; }
@@ -69,36 +74,45 @@ namespace SAM.Picker.Modern {
       Dispatcher.Invoke(() => RefreshFilter());
     }
     private void FetchGames() {
-      byte[] bytes;
-      using (WebClient downloader = new WebClient()) {
-        try { bytes = downloader.DownloadData(new Uri("https://gib.me/sam/games.xml")); }
-        catch { bytes = System.Text.Encoding.UTF8.GetBytes("<games><game type=\"normal\">480</game></games>"); }
-      }
-      List<KeyValuePair<uint, string>> pairs = new List<KeyValuePair<uint, string>>();
-      using (MemoryStream stream = new MemoryStream(bytes, false)) {
-        XPathDocument document = new XPathDocument(stream);
-        var navigator = document.CreateNavigator();
-        var nodes = navigator.Select("/games/game");
-        while (nodes.MoveNext()) {
-          string type = nodes.Current.GetAttribute("type", "");
-          if (string.IsNullOrEmpty(type)) type = "normal";
-          pairs.Add(new KeyValuePair<uint, string>((uint)nodes.Current.ValueAsLong, type));
+      try {
+        byte[] bytes;
+        using (WebClient downloader = new WebClient()) {
+          try { bytes = downloader.DownloadData(new Uri("https://gib.me/sam/games.xml")); }
+          catch { bytes = System.Text.Encoding.UTF8.GetBytes("<games><game type=\"normal\">480</game></games>"); }
         }
-      }
-      var fetchedGames = new List<GameInfo>();
-      foreach (var kv in pairs) {
-        if (_SteamClient.SteamApps008.IsSubscribedApp(kv.Key)) {
-          var name = _SteamClient.SteamApps001.GetAppData(kv.Key, "name") ?? $"App {kv.Key}";
-          fetchedGames.Add(new GameInfo { Id = kv.Key, Name = name, Type = kv.Value, ImageUrl = $"https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/{kv.Key}/capsule_231x87.jpg" });
+        List<KeyValuePair<uint, string>> pairs = new List<KeyValuePair<uint, string>>();
+        using (MemoryStream stream = new MemoryStream(bytes, false)) {
+          XPathDocument document = new XPathDocument(stream);
+          var navigator = document.CreateNavigator();
+          var nodes = navigator.Select("/games/game");
+          while (nodes.MoveNext()) {
+            string type = nodes.Current.GetAttribute("type", "");
+            if (string.IsNullOrEmpty(type)) type = "normal";
+            pairs.Add(new KeyValuePair<uint, string>((uint)nodes.Current.ValueAsLong, type));
+          }
         }
+        var fetchedGames = new List<GameInfo>();
+        foreach (var kv in pairs) {
+          try {
+            if (_SteamClient.SteamApps008.IsSubscribedApp(kv.Key)) {
+              var name = _SteamClient.SteamApps001.GetAppData(kv.Key, "name") ?? $"App {kv.Key}";
+              fetchedGames.Add(new GameInfo { Id = kv.Key, Name = name, Type = kv.Value, ImageUrl = $"https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/{kv.Key}/capsule_231x87.jpg" });
+            }
+          } catch { /* Skip games that cause errors */ }
+        }
+        Dispatcher.Invoke(() => {
+          _AllGames.Clear();
+          _AllGames.AddRange(fetchedGames);
+          HomeStatusText.Text = $"{fetchedGames.Count} games detected! Your wallet sends its regards.";
+          HomeLoadingOverlay.Visibility = Visibility.Collapsed;
+          RefreshFilter();
+        });
+      } catch (Exception ex) {
+        Dispatcher.Invoke(() => {
+          DisplayAlert($"Error fetching games: {ex.Message}", true);
+          HomeLoadingOverlay.Visibility = Visibility.Collapsed;
+        });
       }
-      Dispatcher.Invoke(() => {
-        _AllGames.Clear();
-        _AllGames.AddRange(fetchedGames);
-        HomeStatusText.Text = $"{fetchedGames.Count} games detected! Your wallet sends its regards.";
-        HomeLoadingOverlay.Visibility = Visibility.Collapsed;
-        RefreshFilter();
-      });
     }
     private void RefreshFilter() {
       if (SearchBox == null) return;
@@ -166,7 +180,7 @@ namespace SAM.Picker.Modern {
           });
         };
       } catch (Exception ex) {
-        MessageBox.Show("Failed to switch Steam context: " + ex.Message);
+        DisplayAlert("Failed to switch Steam context: " + ex.Message, true);
         LoadingOverlay.Visibility = Visibility.Collapsed;
         _CallbackTimer.Start();
         return;
@@ -194,14 +208,17 @@ namespace SAM.Picker.Modern {
       int unlocked = _Achievements.Count(x => x.IsAchieved);
       int total = _Achievements.Count;
       int locked = total - unlocked;
-      if (unlocked == total && total > 0) GameStatusText.Text = $"Unlocked all {total}. Please go touch some grass.";
+      if (unlocked == total && total > 0) GameStatusText.Text = $"Unlocked all {total}. Please, go touch some grass.";
       else if (unlocked == 0 && total > 0) GameStatusText.Text = $"0 down, {total} to go. Do you even play this game?";
       else GameStatusText.Text = $"{unlocked} out of {total} down, {locked} to go. Back to the grind.";
       LoadingOverlay.Visibility = Visibility.Collapsed;
     }
     private void AchievementFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) => RefreshAchievementFilter();
     private void Sort_Click(object sender, RoutedEventArgs e) {
-      if (SortButton.ContextMenu != null) { SortButton.ContextMenu.PlacementTarget = SortButton; SortButton.ContextMenu.IsOpen = true; }
+      if (SortButton.ContextMenu != null) {
+        SortButton.ContextMenu.PlacementTarget = SortButton;
+        SortButton.ContextMenu.IsOpen = true;
+      }
     }
     private void SortOption_Click(object sender, RoutedEventArgs e) {
       if (_AchievementView == null) return;
@@ -217,7 +234,10 @@ namespace SAM.Picker.Modern {
       _AchievementView.Refresh();
     }
     private void BulkAction_Click(object sender, RoutedEventArgs e) {
-      if (sender is Button btn && btn.ContextMenu != null) { btn.ContextMenu.PlacementTarget = btn; btn.ContextMenu.IsOpen = true; }
+      if (sender is Button btn && btn.ContextMenu != null) {
+        btn.ContextMenu.PlacementTarget = btn;
+        btn.ContextMenu.IsOpen = true;
+      }
     }
     private void UnlockAll_Click(object sender, RoutedEventArgs e) { foreach (var ach in _Achievements) ach.IsAchieved = true; }
     private void ToggleSearch_Click(object sender, RoutedEventArgs e) {
@@ -302,8 +322,8 @@ namespace SAM.Picker.Modern {
       foreach (var ach in _Achievements) {
         if (!_SteamClient.SteamUserStats.SetAchievement(ach.Id, ach.IsAchieved)) success = false;
       }
-      if (success && _SteamClient.SteamUserStats.StoreStats()) { MessageBox.Show("Changes stored successfully!"); LoadGameData(); }
-      else MessageBox.Show("Failed to store changes.");
+      if (success && _SteamClient.SteamUserStats.StoreStats()) { DisplayAlert("Changes stored successfully!", false); LoadGameData(); }
+      else DisplayAlert("Failed to store changes.", true);
     }
     private void ClearSearch_Click(object sender, RoutedEventArgs e) { SearchBox.Text = string.Empty; }
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -362,7 +382,7 @@ namespace SAM.Picker.Modern {
         var random = new Random();
         foreach (var ach in _Achievements) { if (!ach.IsAchieved) ach.TimerMinutes = random.Next(min, max + 1).ToString(); }
         if (RandomTimerPopup != null) RandomTimerPopup.IsOpen = false;
-      } else MessageBox.Show("Please enter valid numeric values for Min and Max minutes.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+      } else DisplayAlert("Please enter valid numeric values for Min and Max minutes.", true);
     }
     private bool _IsTimerActive = false;
     private bool _IsTimerPaused = false;
@@ -375,7 +395,7 @@ namespace SAM.Picker.Modern {
       if (_IsTimerActive) { _IsTimerPaused = !_IsTimerPaused; UpdateTimerButtonState(); return; }
       try {
         var achievements = _Achievements.ToList();
-        if (!achievements.Any()) { MessageBox.Show("No achievements in the collection.", "Timer Info", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        if (!achievements.Any()) { DisplayAlert("No achievements in the collection.", true); return; }
         _IsTimerActive = true; _IsTimerPaused = false; IsTimerRunning = true; UpdateTimerButtonState();
         if (SortButton != null) SortButton.Visibility = Visibility.Collapsed;
         if (RandomTimerButton != null) RandomTimerButton.Visibility = Visibility.Collapsed;
@@ -405,11 +425,11 @@ namespace SAM.Picker.Modern {
           await Task.Delay(1000);
         }
         if (_IsTimerActive) {
-          if (processedCount == 0) MessageBox.Show("No locked achievements with a valid timer were found.", "Timer Info", MessageBoxButton.OK, MessageBoxImage.Information);
-          else MessageBox.Show($"Timer sequence complete. {processedCount} achievements unlocked.", "Timer Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+          if (processedCount == 0) DisplayAlert("No locked achievements with a valid timer were found.", false);
+          else DisplayAlert($"Timer sequence complete. {processedCount} achievements unlocked.", false);
         }
         GameStatusText.Text = originalStatus;
-      } catch (Exception ex) { MessageBox.Show($"Error running timer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+      } catch (Exception ex) { DisplayAlert($"Error running timer: {ex.Message}", true); }
       finally {
         _IsTimerActive = false; _IsTimerPaused = false; IsTimerRunning = false; UpdateTimerButtonState();
         if (SortButton != null) SortButton.Visibility = Visibility.Visible;
