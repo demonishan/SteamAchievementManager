@@ -16,7 +16,7 @@
     <Copyright>Copyright © Ishan Samanta (666de666) 2025</Copyright>
     <Description></Description>
     <FileVersion>8.1.0.0</FileVersion>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <OutputType>WinExe</OutputType>
     <Platforms>x86</Platforms>
     <PlatformTarget>x86</PlatformTarget>

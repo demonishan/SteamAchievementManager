@@ -7,7 +7,7 @@
     <Copyright>Copyright © Gibbed 2019</Copyright>
     <Description></Description>
     <FileVersion>8.1.0.0</FileVersion>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Platforms>x86</Platforms>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/gibbed/SteamAchievementManager/</RepositoryUrl>
