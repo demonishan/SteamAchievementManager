@@ -261,7 +261,7 @@ namespace SAM.Picker.Modern {
       else SharedStatusText.Text = $"{unlocked} out of {total} down, {locked} to go. Back to the grind.";
       LoadingOverlay.Visibility = Visibility.Collapsed;
     }
-    private void AchievementFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) => RefreshAchievementFilter();
+    private void AchievementFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { RefreshAchievementFilter(); UpdateIndices(); }
     private void SortFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (_AchievementView == null) return;
       if (SortFilter.SelectedItem is ComboBoxItem item) {
@@ -272,6 +272,7 @@ namespace SAM.Picker.Modern {
         else if (tag == "Rarity_Asc") _AchievementView.SortDescriptions.Add(new SortDescription("GlobalPercent", ListSortDirection.Ascending));
         else if (tag == "Rarity_Desc") _AchievementView.SortDescriptions.Add(new SortDescription("GlobalPercent", ListSortDirection.Descending));
         _AchievementView.Refresh();
+        UpdateIndices();
       }
     }
     private void BulkAction_Click(object sender, RoutedEventArgs e) {
@@ -454,6 +455,7 @@ namespace SAM.Picker.Modern {
         foreach (ComboBoxItem item in AchievementFilter.Items) {
           if (item.Tag?.ToString() == "locked") { AchievementFilter.SelectedItem = item; break; }
         }
+        UpdateIndices();
         RefreshFilter();
         if (SharedStatusText != null) SharedStatusText.Text = "Drag and drop the achievements, set the delay in minutes, and 'Start Timer'.";
       } else {
@@ -572,15 +574,33 @@ namespace SAM.Picker.Modern {
     }
     private void AchievementList_Drop(object sender, DragEventArgs e) {
       if (!IsTimerMode || IsTimerRunning) return;
+      if (_AchievementView.SortDescriptions.Count > 0) {
+        var sd = _AchievementView.SortDescriptions[0];
+        var sorted = _Achievements.ToList();
+        if (sd.PropertyName == "Name") sorted = (sd.Direction == ListSortDirection.Ascending) ? sorted.OrderBy(x => x.Name).ToList() : sorted.OrderByDescending(x => x.Name).ToList();
+        else if (sd.PropertyName == "GlobalPercent") sorted = (sd.Direction == ListSortDirection.Ascending) ? sorted.OrderBy(x => x.GlobalPercent).ToList() : sorted.OrderByDescending(x => x.GlobalPercent).ToList();
+        _Achievements.Clear();
+        foreach (var item in sorted) _Achievements.Add(item);
+        _AchievementView.SortDescriptions.Clear();
+        if (SortFilter != null) SortFilter.SelectedIndex = 0;
+      }
       if (e.Data.GetDataPresent("myFormat")) {
         AchievementViewModel source = e.Data.GetData("myFormat") as AchievementViewModel;
         AchievementViewModel target = ((FrameworkElement)e.OriginalSource).DataContext as AchievementViewModel;
         if (source != null && target != null && source != target) {
           int oldIndex = _Achievements.IndexOf(source);
           int newIndex = _Achievements.IndexOf(target);
-          if (oldIndex != -1 && newIndex != -1) _Achievements.Move(oldIndex, newIndex);
+          if (oldIndex != -1 && newIndex != -1) {
+            _Achievements.Move(oldIndex, newIndex);
+            UpdateIndices();
+          }
         }
       }
+    }
+    private void UpdateIndices() {
+      if (_AchievementView == null) return;
+      int i = 1;
+      foreach (AchievementViewModel ach in _AchievementView) ach.Index = i++;
     }
     private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject {
       do {
@@ -641,6 +661,16 @@ namespace SAM.Picker.Modern {
       }
     }
     public DateTime? UnlockTime { get; set; }
+    private int _Index;
+    public int Index {
+      get => _Index;
+      set {
+        if (_Index != value) {
+          _Index = value;
+          OnPropertyChanged(nameof(Index));
+        }
+      }
+    }
     public event PropertyChangedEventHandler PropertyChanged;
     protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
   }
