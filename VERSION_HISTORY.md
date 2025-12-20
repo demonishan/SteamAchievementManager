@@ -1,5 +1,9 @@
 ## Version History
 
+### 8.2.3 (2026-12-21)
+- Added "Details" button with external links support (Completionist.me).
+- UI polish and layout adjustments.
+
 ### 8.2.2 (2026-12-20)
 - Implemented image caching and async loading for faster library loading.
 - Optimized shutdown process.

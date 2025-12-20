@@ -75,6 +75,7 @@
     <Geometry x:Key="Icon.Play">M8,5.14V19.14L19,12.14L8,5.14Z</Geometry>
     <Geometry x:Key="Icon.Random">M10.59,9.17L5.41,4L4,5.41L9.17,10.58L10.59,9.17M14.5,4L16.54,6.04L4,18.59L5.41,20L17.96,7.46L20,9.5V4H14.5M15,15.41L18.59,19L20,17.59L16.41,14L15,15.41Z</Geometry>
     <Geometry x:Key="Icon.Pause">M14,19H18V5H14M6,19H10V5H6V19Z</Geometry>
+    <Geometry x:Key="Icon.Web">M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.64L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z</Geometry>
     <Style TargetType="ComboBox">
       <Setter Property="Background" Value="#333337"/>
       <Setter Property="Foreground" Value="White"/>
@@ -281,6 +282,20 @@
             <TextBlock x:Name="SelectedGameName" FontSize="24" FontWeight="Bold" Foreground="White"/>
           </StackPanel>
           <StackPanel Grid.Column="2" Orientation="Horizontal">
+            <Button x:Name="LinksButton" Width="40" Height="40" Margin="5,0" Style="{StaticResource ActionButtonStyle}" Click="Links_Click" ToolTip="External Links">
+              <Path Data="{StaticResource Icon.Web}" Style="{StaticResource PathIconStyle}"/>
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Achievement Progress" Tag="steam_achievements" Click="LinkOption_Click"/>
+                  <MenuItem Header="Global Stats" Tag="global_stats" Click="LinkOption_Click"/>
+                  <MenuItem Header="Store" Tag="store" Click="LinkOption_Click"/>
+                  <MenuItem Header="Guides" Tag="guides" Click="LinkOption_Click"/>
+                  <Separator/>
+                  <MenuItem Header="Completionist.me" Tag="completionist" Click="LinkOption_Click"/>
+                  <MenuItem Header="SteamDB" Tag="steamdb" Click="LinkOption_Click"/>
+                </ContextMenu>
+              </Button.ContextMenu>
+            </Button>
             <Button x:Name="BulkActionsButton" Width="100" Height="40" Margin="5,0" Style="{StaticResource ActionButtonStyle}" Click="BulkAction_Click">
               <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Bulk Actions" VerticalAlignment="Center" Margin="5,0"/>

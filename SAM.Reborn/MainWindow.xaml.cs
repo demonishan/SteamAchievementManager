@@ -283,6 +283,27 @@ namespace SAM.Picker.Modern {
     private void UnlockAll_Click(object sender, RoutedEventArgs e) {
       foreach (var ach in _Achievements) ach.IsAchieved = true;
     }
+    private void Links_Click(object sender, RoutedEventArgs e) {
+      if (LinksButton.ContextMenu != null) {
+        LinksButton.ContextMenu.PlacementTarget = LinksButton;
+        LinksButton.ContextMenu.IsOpen = true;
+      }
+    }
+    private void LinkOption_Click(object sender, RoutedEventArgs e) {
+      if (sender is MenuItem item) {
+        try {
+          var steamId = _SteamClient.SteamUser.GetSteamId();
+          string url = "";
+          if (item.Tag?.ToString() == "completionist") url = $"https://completionist.me/steam/profile/{steamId}/app/{_SelectedGameId}";
+          else if (item.Tag?.ToString() == "steam_achievements") url = $"https://steamcommunity.com/profiles/{steamId}/stats/{_SelectedGameId}/achievements/";
+          else if (item.Tag?.ToString() == "global_stats") url = $"https://steamcommunity.com/stats/{_SelectedGameId}/achievements/";
+          else if (item.Tag?.ToString() == "steamdb") url = $"https://steamdb.info/app/{_SelectedGameId}/";
+          else if (item.Tag?.ToString() == "store") url = $"https://store.steampowered.com/app/{_SelectedGameId}/";
+          else if (item.Tag?.ToString() == "guides") url = $"https://steamcommunity.com/app/{_SelectedGameId}/guides/";
+          if (!string.IsNullOrEmpty(url)) Process.Start(url);
+        } catch { }
+      }
+    }
     private void ToggleSearch_Click(object sender, RoutedEventArgs e) {
       if (AchievementSearchRow.Visibility == Visibility.Visible) AchievementSearchRow.Visibility = Visibility.Collapsed;
       else AchievementSearchRow.Visibility = Visibility.Visible;
