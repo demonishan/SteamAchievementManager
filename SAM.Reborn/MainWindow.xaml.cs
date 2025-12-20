@@ -107,6 +107,7 @@ namespace SAM.Picker.Modern {
           HomeStatusText.Text = $"{fetchedGames.Count} games detected! Your wallet sends its regards.";
           HomeLoadingOverlay.Visibility = Visibility.Collapsed;
           RefreshFilter();
+          StartImageCaching();
         });
       } catch (Exception ex) {
         Dispatcher.Invoke(() => {
@@ -115,13 +116,50 @@ namespace SAM.Picker.Modern {
         });
       }
     }
+    private void StartImageCaching() {
+      var games = _AllGames.ToList();
+      Task.Run(async () => {
+        try {
+          var cacheDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache");
+          if (!Directory.Exists(cacheDir)) Directory.CreateDirectory(cacheDir);
+          using (var client = new WebClient()) {
+            foreach (var game in games) {
+              if (game.CachedIcon != null) continue;
+              var path = Path.Combine(cacheDir, $"{game.Id}.jpg");
+              bool needsDownload = !File.Exists(path) || new FileInfo(path).Length == 0;
+              if (needsDownload) {
+                try {
+                  var data = await client.DownloadDataTaskAsync(new Uri(game.ImageUrl));
+                  if (data.Length > 0) File.WriteAllBytes(path, data);
+                } catch { }
+                await Task.Delay(50);
+              }
+              if (File.Exists(path) && new FileInfo(path).Length > 0) {
+                await Dispatcher.InvokeAsync(() => {
+                  try {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(path, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    game.CachedIcon = bitmap;
+                    var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
+                    if (vm != null) vm.Image = bitmap;
+                  } catch { }
+                }, DispatcherPriority.Background);
+              }
+            }
+          }
+        } catch { }
+      });
+    }
     private void RefreshFilter() {
       if (SearchBox == null) return;
       var searchText = SearchBox.Text.ToLower(CultureInfo.InvariantCulture);
       if (ClearSearchBtn != null) ClearSearchBtn.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Collapsed : Visibility.Visible;
       var filtered = _AllGames.Where(g => (string.IsNullOrEmpty(searchText) || g.Name.ToLower(CultureInfo.InvariantCulture).Contains(searchText)) && ((g.Type == "normal" && _WantGames) || (g.Type == "mod" && _WantMods) || (g.Type == "demo" && _WantDemos) || (g.Type == "junk" && _WantJunk))).OrderBy(g => g.Name).ToList();
       _FilteredGames.Clear();
-      foreach (var g in filtered) _FilteredGames.Add(new GameViewModel { Id = g.Id, Name = g.Name, Image = new BitmapImage(new Uri(g.ImageUrl)) });
+      foreach (var g in filtered) _FilteredGames.Add(new GameViewModel { Id = g.Id, Name = g.Name, Image = g.CachedIcon });
     }
     private ObservableCollection<AchievementViewModel> _Achievements = new ObservableCollection<AchievementViewModel>();
     private uint _SelectedGameId;
@@ -470,8 +508,14 @@ namespace SAM.Picker.Modern {
       return null;
     }
   }
-  public class GameInfo { public uint Id { get; set; } public string Name { get; set; } public string Type { get; set; } public string ImageUrl { get; set; } }
-  public class GameViewModel { public uint Id { get; set; } public string Name { get; set; } public System.Windows.Media.ImageSource Image { get; set; } }
+  public class GameInfo { public uint Id { get; set; } public string Name { get; set; } public string Type { get; set; } public string ImageUrl { get; set; } public System.Windows.Media.ImageSource CachedIcon { get; set; } }
+  public class GameViewModel : INotifyPropertyChanged {
+    public uint Id { get; set; } public string Name { get; set; }
+    private System.Windows.Media.ImageSource _Image;
+    public System.Windows.Media.ImageSource Image { get => _Image; set { if (_Image != value) { _Image = value; OnPropertyChanged(nameof(Image)); } } }
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+  }
   public class AchievementViewModel : INotifyPropertyChanged {
     public string Id { get; set; } public string Name { get; set; } public string Description { get; set; } public float GlobalPercent { get; set; } public string IconUrl { get; set; } public System.Windows.Media.ImageSource Icon { get; set; }
     private bool _IsAchieved;
