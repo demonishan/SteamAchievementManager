@@ -64,10 +64,11 @@ namespace SAM.Picker.Modern {
       MaximizeBtn.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
     }
     protected override void OnClosed(EventArgs e) {
-      _CallbackTimer?.Stop();
-      _SteamClient?.Dispose();
-      SAM.API.Steam.Unload();
+      try { _CallbackTimer?.Stop(); } catch { }
+      try { _SteamClient?.Dispose(); } catch { }
+      try { SAM.API.Steam.Unload(); } catch { }
       base.OnClosed(e);
+      Environment.Exit(0);
     }
     private async void LoadData() {
       await System.Threading.Tasks.Task.Run(() => FetchGames());
