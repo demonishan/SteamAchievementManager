@@ -1,5 +1,12 @@
 ## Version History
 
+### 8.3.4 (2026-12-21)
+- Added support for Protected Achievements:
+  - Shield icon indicator for protected achievements.
+  - Modification tools (Save, Timer, Bulk Actions) are hidden when protection is active.
+  - Checkboxes are hidden to prevent accidental unlocking.
+  - Status bar warning for protected games.
+
 ### 8.3.3 (2026-12-21)
 - Polished Timer Mode UI: index of the achievement queue, ETA display based on current time, drag handle position, responsiveness.
 - Added comprehensive external links support (Steam Store, Guides, Stats, SteamDB, Completionist.me).
