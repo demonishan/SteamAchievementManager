@@ -1,5 +1,9 @@
 ## Version History
 
+### 8.3.6 (2026-12-23)
+- Refactored image caching: Standard download -> Steam API JSON Fallback -> Local Placeholder.
+- Improved game image download reliability with robust fallback for missing hashes.
+
 ### 8.3.5 (2026-12-21)
 - Implemented local caching for achievement images.
 - Organized cache directory structure (separate folders for games and achievements).

@@ -17,6 +17,8 @@ This isn't just a visual skin; it's a complete modernization of the experience:
 - **Random Unlocker**: Generate random unlock times for realistic intervals between achievements.
 - **Improved Performance**: Faster loading and filtering of your library.
 - **Single File Executable**: No more clutter. Just one `.exe` file to verify and run.
+- **Dark Mode**: A dark theme that's easy on the eyes and easy on the battery.
+- **Image Caching**: Cached images are stored in the `cache` folder, making the app faster and more responsive.
 
 ## Getting Started
 

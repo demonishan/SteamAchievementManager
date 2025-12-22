@@ -98,7 +98,7 @@ namespace SAM.Picker.Modern {
           try {
             if (_SteamClient.SteamApps008.IsSubscribedApp(kv.Key)) {
               var name = _SteamClient.SteamApps001.GetAppData(kv.Key, "name") ?? $"App {kv.Key}";
-              fetchedGames.Add(new GameInfo { Id = kv.Key, Name = name, Type = kv.Value, ImageUrl = $"https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/{kv.Key}/capsule_231x87.jpg" });
+              fetchedGames.Add(new GameInfo { Id = kv.Key, Name = name, Type = kv.Value, ImageUrl = $"https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/{kv.Key}/header.jpg" });
             }
           } catch { /* Skip games that cause errors */ }
         }
@@ -118,42 +118,68 @@ namespace SAM.Picker.Modern {
       }
     }
     private void StartImageCaching() {
-      var games = _AllGames.ToList();
+      var games = _AllGames.OrderBy(g => g.Name).ToList();
       Task.Run(async () => {
         try {
           var cacheDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache", "games");
           if (!Directory.Exists(cacheDir)) Directory.CreateDirectory(cacheDir);
           using (var client = new WebClient()) {
             foreach (var game in games) {
-              if (game.CachedIcon != null) continue;
-              var path = Path.Combine(cacheDir, $"{game.Id}.jpg");
-              bool needsDownload = !File.Exists(path) || new FileInfo(path).Length == 0;
-              if (needsDownload) {
-                try {
-                  var data = await client.DownloadDataTaskAsync(new Uri(game.ImageUrl));
-                  if (data.Length > 0) File.WriteAllBytes(path, data);
-                } catch { }
-                await Task.Delay(50);
-              }
-              if (File.Exists(path) && new FileInfo(path).Length > 0) {
-                await Dispatcher.InvokeAsync(() => {
-                  try {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(path, UriKind.Absolute);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    game.CachedIcon = bitmap;
-                    var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
-                    if (vm != null) vm.Image = bitmap;
-                  } catch { }
-                }, DispatcherPriority.Background);
-              }
+              await ProcessGameImage(game, client, cacheDir);
             }
           }
         } catch { }
       });
     }
+    
+    private async Task ProcessGameImage(GameInfo game, WebClient client, string cacheDir) {
+      if (game.CachedIcon != null) return;
+      var path = Path.Combine(cacheDir, $"{game.Id}.jpg");
+      bool needsDownload = !File.Exists(path) || new FileInfo(path).Length == 0;
+      if (needsDownload) {
+        try {
+          var data = await client.DownloadDataTaskAsync(new Uri(game.ImageUrl));
+          if (data.Length > 0) File.WriteAllBytes(path, data);
+        } catch {
+          if (!File.Exists(path) || new FileInfo(path).Length == 0) {
+            try {
+              var json = await client.DownloadStringTaskAsync($"https://store.steampowered.com/api/appdetails?appids={game.Id}");
+              var match = System.Text.RegularExpressions.Regex.Match(json, "\"header_image\"\\s*:\\s*\"(.*?)\"");
+              if (match.Success) {
+                var url = match.Groups[1].Value.Replace("\\/", "/");
+                var data = await client.DownloadDataTaskAsync(new Uri(url));
+                if (data.Length > 0) File.WriteAllBytes(path, data);
+              }
+            } catch { }
+          }
+        }
+        await Task.Delay(25);
+      }
+      if (File.Exists(path) && new FileInfo(path).Length > 0) {
+        await Dispatcher.InvokeAsync(() => {
+          try {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(path, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            game.CachedIcon = bitmap;
+            var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
+            if (vm != null) vm.Image = bitmap;
+          } catch { }
+        }, DispatcherPriority.Background);
+      } else {
+        await Dispatcher.InvokeAsync(() => {
+          try {
+              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.3.6;component/Resources/image-not-found.png"));
+              game.CachedIcon = bitmap;
+              var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
+              if (vm != null) vm.Image = bitmap;
+          } catch { }
+        }, DispatcherPriority.Background);
+      }
+    }
+
     private void RefreshFilter() {
       if (SearchBox == null) return;
       var searchText = SearchBox.Text.ToLower(CultureInfo.InvariantCulture);
@@ -498,7 +524,7 @@ namespace SAM.Picker.Modern {
       IsTimerMode = !IsTimerMode;
       var visibility = IsTimerMode ? Visibility.Collapsed : Visibility.Visible;
       if (BulkActionsButton != null) BulkActionsButton.Visibility = visibility;
-      if (ToggleSearchButton != null) ToggleSearchButton.Visibility = visibility;
+
       if (AchievementSearchRow != null && IsTimerMode) AchievementSearchRow.Visibility = Visibility.Collapsed;
       if (RefreshButton != null) RefreshButton.Visibility = visibility;
       if (SaveButton != null) SaveButton.Visibility = visibility;
