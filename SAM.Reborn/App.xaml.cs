@@ -11,12 +11,19 @@ public partial class App : Application {
     AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
   }
   private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
-    File.WriteAllText("modern_picker_crash.txt", e.Exception.ToString());
-    MessageBox.Show("Crash: " + e.Exception.Message);
+    LogCrash(e.Exception, "DispatcherUnhandledException");
+    MessageBox.Show("An unexpected error occurred. Details have been logged to crash.log.\n\n" + e.Exception.Message, "SAM Reborn Crash", MessageBoxButton.OK, MessageBoxImage.Error);
     e.Handled = true;
   }
   private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) {
-    File.WriteAllText("modern_picker_domain_crash.txt", e.ExceptionObject.ToString());
-    MessageBox.Show("Domain Crash: " + e.ExceptionObject);
+    LogCrash(e.ExceptionObject as Exception, "CurrentDomain_UnhandledException");
+    MessageBox.Show("A critical error occurred. Details have been logged to crash.log.\n\n" + e.ExceptionObject, "SAM Reborn Critical Error", MessageBoxButton.OK, MessageBoxImage.Error);
+  }
+  public static void LogCrash(Exception ex, string source) {
+    try {
+      string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log");
+      string errorMsg = $"[{DateTime.Now}] [{source}]\n{ex?.ToString() ?? "Unknown Error"}\n--------------------------------------------------\n";
+      File.AppendAllText(logFile, errorMsg);
+    } catch { }
   }
 }

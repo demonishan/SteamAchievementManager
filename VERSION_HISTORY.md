@@ -1,5 +1,11 @@
 ## Version History
 
+### 8.4.7 (2026-12-23)
+- Feature: Broken Achievement detection. Achievements with missing or zero-byte images now display a specific "Broken" icon with a tooltip explaining potential issues.
+- Fix: Resolved application crash when switching between games, specifically when transitioning from games with no hidden achievements.
+- Fix: Corrected "Reveal Hidden" button visibility logic and spacing uniformity.
+- System: Implemented robust crash logging. Critical and unhandled errors are now saved to `crash.log` for troubleshooting.
+
 ### 8.4.6 (2026-12-22)
 - Hidden achievement handling:
   - Hidden locked achievements now display as "Hidden Achievement" with a placeholder description and a hidden icon until unlocked or revealed.

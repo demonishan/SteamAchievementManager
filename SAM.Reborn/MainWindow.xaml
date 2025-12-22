@@ -464,7 +464,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <Border Background="#20232a" CornerRadius="4" Height="40" Margin="0,5">
+          <Border Background="#20232a" CornerRadius="4" Height="40" Margin="0,0,5,0">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
@@ -476,9 +476,6 @@
               <Button x:Name="ClearAchievementSearchBtn" Grid.Column="2" Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12" Width="40" Background="Transparent" Foreground="#888888" BorderThickness="0" Visibility="Collapsed" Click="ClearAchievementSearch_Click"/>
             </Grid>
           </Border>
-          <ToggleButton x:Name="RevealHiddenBtn" Grid.Column="1" Width="40" Height="40" Margin="0,5" Style="{StaticResource ToggleActionButtonStyle}" Click="RevealHidden_Click" ToolTip="Reveal Hidden Achievements" Visibility="Collapsed">
-            <Path Data="{StaticResource Icon.EyeOff}" Style="{StaticResource PathIconStyle}"/>
-          </ToggleButton>
           <StackPanel x:Name="FilterButtonsPanel" Grid.Column="2" Orientation="Horizontal" Margin="5,0">
             <ToggleButton x:Name="FilterAllBtn" Width="40" Height="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleLeft}" Click="FilterToggle_Click" ToolTip="Show All Achievements" IsChecked="True">
               <Path Data="{StaticResource Icon.All}" Style="{StaticResource PathIconStyle}"/>
@@ -490,6 +487,9 @@
               <Path Data="{StaticResource Icon.Unlock}" Style="{StaticResource PathIconStyle}"/>
             </ToggleButton>
           </StackPanel>
+          <ToggleButton x:Name="RevealHiddenBtn" Grid.Column="1" Width="40" Height="40" Margin="5,0" Style="{StaticResource ToggleActionButtonStyle}" Click="RevealHidden_Click" ToolTip="Reveal Hidden Achievements" Visibility="Collapsed">
+            <Path Data="{StaticResource Icon.EyeOff}" Style="{StaticResource PathIconStyle}"/>
+          </ToggleButton>
           <ComboBox x:Name="SortFilter" Grid.Column="3" Height="40" MinWidth="150" Margin="5,0,0,0" SelectionChanged="SortFilter_SelectionChanged" SelectedIndex="0" VerticalContentAlignment="Center">
             <ComboBoxItem Content="Rarity (Common first)" Tag="Rarity_Desc"/>
             <ComboBoxItem Content="Rarity (Rarest first)" Tag="Rarity_Asc"/>

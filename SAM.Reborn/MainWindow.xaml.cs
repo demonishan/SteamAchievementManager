@@ -172,7 +172,7 @@ namespace SAM.Picker.Modern {
       } else {
         await Dispatcher.InvokeAsync(() => {
           try {
-              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.6;component/Resources/image-not-found.png"));
+              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/image-not-found.png"));
               game.CachedIcon = bitmap;
               var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
               if (vm != null) vm.Image = bitmap;
@@ -220,7 +220,7 @@ namespace SAM.Picker.Modern {
           } else {
             avm.Name = "Hidden Achievement";
             avm.Description = "Details for this achievement Will be revealed once unlocked";
-            try { avm.Icon = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.6;component/Resources/hidden.png")); } catch { } 
+            try { avm.Icon = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/hidden.png")); } catch { } 
           }
         }
       }
@@ -263,13 +263,13 @@ namespace SAM.Picker.Modern {
         if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
         if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
         if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
+        if (RevealHiddenBtn != null) { RevealHiddenBtn.IsChecked = false; RevealHiddenBtn.Visibility = Visibility.Collapsed; }
         if (SortFilter != null) SortFilter.SelectedIndex = 0;
         if (AchievementSearchBox != null) AchievementSearchBox.Text = string.Empty;
       } else {
         RefreshAchievementFilter();
         ApplySort();
       }
-      _Achievements.Clear();
       _Achievements.Clear();
       LoadingOverlay.Visibility = Visibility.Visible;
       SharedStatusText.Text = "Switching Steam context...";
@@ -283,7 +283,10 @@ namespace SAM.Picker.Modern {
         _UserStatsReceivedCallback = _SteamClient.CreateAndRegisterCallback<SAM.API.UserStatsReceived>();
         _UserStatsReceivedCallback.OnRun += (p) => {
           Dispatcher.Invoke(() => {
-            if (p.Result == 1) FetchAchievements();
+            if (p.Result == 1) {
+                try { FetchAchievements(); } 
+                catch (Exception ex) { DisplayAlert("Error fetching achievements: " + ex.Message, true); LoadingOverlay.Visibility = Visibility.Collapsed; }
+            }
             else { SharedStatusText.Text = $"Steam error {p.Result} (UserStatsReceived)."; LoadingOverlay.Visibility = Visibility.Collapsed; }
           });
         };
@@ -315,7 +318,7 @@ namespace SAM.Picker.Modern {
           if (isHiddenLocked) {
             name = "Hidden Achievement";
             description = "Details for this achievement Will be revealed once unlocked";
-            displayedIconUrl = "pack://application:,,,/SAM.Reborn.2026-8.4.6;component/Resources/hidden.png";
+            displayedIconUrl = "pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/hidden.png";
           }
           var avm = new AchievementViewModel {
             Id = def.Id,

@@ -186,6 +186,7 @@ FodyWeavers.xsd
 Generated_Code/
 Generated\ Files/
 healthchecksdb
+INFO.md
 ipch/
 MigrationBackup/
 mono_crash.*
