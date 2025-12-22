@@ -1,6 +1,9 @@
 # Super Lazy Achievement Manager (SLAM)
 
-**A modern revival of the legendary [Steam Achievement Manager](https://github.com/gibbed/SteamAchievementManager).**
+***A modern revival of the legendary [Steam Achievement Manager](https://github.com/gibbed/SteamAchievementManager).**
+
+
+![Poster](Resources/poster.png)
 
 ## About the Project
 
