@@ -1,4 +1,4 @@
-# SAM Reborn - 2026
+# Super Lazy Achievement Manager (SLAM)
 
 **A modern revival of the legendary [Steam Achievement Manager](https://github.com/gibbed/SteamAchievementManager).**
 
@@ -6,7 +6,7 @@
 
 Steam Achievement Manager (SAM) was originally released in 2008 and became the go-to tool for managing Steam achievements. However, its development effectively stopped over a decade ago.
 
-**SAM Reborn** is a fork of the original project. I have picked up the pieces to bring this essential tool into the modern era. The core functionality remains, but the experience has been completely overhauled with a modern design and powerful new features.
+**SLAM** is a fork of the original project. I have picked up the pieces to bring this essential tool into the modern era. The core functionality remains, but the experience has been completely overhauled with a modern design and powerful new features.
 
 ## What's New?
 
@@ -23,7 +23,7 @@ This isn't just a visual skin; it's a complete modernization of the experience:
 ## Getting Started
 
 1. **Download** the latest release from the `Dist` folder.
-2. **Execute** `SAM.Reborn.2026.exe`.
+2. **Execute** `SLAM.exe`.
 3. Select a game from your library.
 4. Unlock (or lock!) achievements to your heart's content.
 

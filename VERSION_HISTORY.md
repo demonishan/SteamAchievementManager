@@ -50,4 +50,4 @@
 - Implemented timer functionality.
 
 ### 8.0.0 (2026-12-19)
-- Initial release of SAM Reborn - 2026
+- Initial release of Super Lazy Achievement Manager - 2026

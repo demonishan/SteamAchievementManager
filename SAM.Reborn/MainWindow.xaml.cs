@@ -172,7 +172,7 @@ namespace SAM.Picker.Modern {
       } else {
         await Dispatcher.InvokeAsync(() => {
           try {
-              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/image-not-found.png"));
+              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SLAM;component/Resources/image-not-found.png"));
               game.CachedIcon = bitmap;
               var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
               if (vm != null) vm.Image = bitmap;
@@ -197,8 +197,8 @@ namespace SAM.Picker.Modern {
       if (sender is FrameworkElement element && element.DataContext is GameViewModel game) {
         _SelectedGameId = game.Id;
         SelectedGameName.Text = game.Name;
-        if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - SAM Reborn 2026";
-        Title = $"{game.Name} - SAM Reborn 2026";
+        if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
+        Title = $"{game.Name} - SLAM";
         HomeView.Visibility = Visibility.Collapsed;
         GameDetailsView.Visibility = Visibility.Visible;
         SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
@@ -220,7 +220,7 @@ namespace SAM.Picker.Modern {
           } else {
             avm.Name = "Hidden Achievement";
             avm.Description = "Details for this achievement Will be revealed once unlocked";
-            try { avm.Icon = new BitmapImage(new Uri("pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/hidden.png")); } catch { } 
+            try { avm.Icon = new BitmapImage(new Uri("pack://application:,,,/SLAM;component/Resources/hidden.png")); } catch { } 
           }
         }
       }
@@ -318,7 +318,7 @@ namespace SAM.Picker.Modern {
           if (isHiddenLocked) {
             name = "Hidden Achievement";
             description = "Details for this achievement Will be revealed once unlocked";
-            displayedIconUrl = "pack://application:,,,/SAM.Reborn.2026-8.4.7;component/Resources/hidden.png";
+            displayedIconUrl = "pack://application:,,,/SLAM;component/Resources/hidden.png";
           }
           var avm = new AchievementViewModel {
             Id = def.Id,
@@ -346,7 +346,7 @@ namespace SAM.Picker.Modern {
       int locked = total - unlocked;
       if (anyProtected) {
         AreModificationsAllowed = false;
-        SharedStatusText.Text = "These achievements are protected. Can't modify them through SAM Reborn.";
+        SharedStatusText.Text = "These achievements are protected. Can't modify them through SLAM.";
         DisplayAlert(SharedStatusText.Text, true);
         UpdateProtectionState();
       }
@@ -517,8 +517,8 @@ namespace SAM.Picker.Modern {
       }
       GameDetailsView.Visibility = Visibility.Collapsed;
       HomeView.Visibility = Visibility.Visible;
-      if (WindowTitleText != null) WindowTitleText.Text = "SAM Reborn 2026";
-      Title = "SAM Reborn 2026";
+      if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
+      Title = "SLAM";
       _CallbackTimer.Stop();
       _SteamClient?.Dispose();
       _SteamClient = null;

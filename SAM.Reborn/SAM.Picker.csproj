@@ -11,14 +11,14 @@
   </ItemGroup>
   <PropertyGroup>
     <ApplicationIcon>..\Resources\icon.ico</ApplicationIcon>
-    <AssemblyName>SAM.Reborn.2026-8.4.7</AssemblyName>
+    <AssemblyName>SLAM</AssemblyName>
     <AssemblyVersion>8.4.7.0</AssemblyVersion>
     <Authors>Ishan Samanta [666de666.com]</Authors>
     <Company>DEMONiZER Corp.</Company>
     <Copyright>Copyright © 2025 Ishan Samanta</Copyright>
-    <Description></Description>
+    <Description>Super Lazy Achievement Manager</Description>
     <FileVersion>8.4.7.0</FileVersion>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <OutputType>WinExe</OutputType>
     <Platforms>x86</Platforms>
     <PlatformTarget>x86</PlatformTarget>
