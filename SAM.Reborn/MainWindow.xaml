@@ -692,7 +692,8 @@
         </Grid>
       </Grid>
     </Grid>
-    <Border Grid.Row="2" Background="#1A9fff" Height="25" Padding="15,0">
+    <ProgressBar x:Name="AchievementProgressBar" Grid.Row="2" Height="5" VerticalAlignment="Top" Background="#666666" Foreground="#FFFFFF" BorderThickness="0" Minimum="0" Maximum="100" Visibility="Collapsed"/>
+    <Border Grid.Row="2" Background="#1A9fff" Height="25" Padding="15,0" Margin="0,5,0,0">
       <TextBlock x:Name="SharedStatusText" Text="Consulting Lord Gaben for your Steam library data..." Foreground="White" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left"/>
     </Border>
   </Grid>

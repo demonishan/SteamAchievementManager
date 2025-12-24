@@ -322,9 +322,12 @@ namespace SAM.Picker.Modern {
           bool isHiddenLocked = def.IsHidden == 1 && !isAchieved;
           string displayedIconUrl = iconUrl;
           if (isHiddenLocked) {
-            name = "Hidden Achievement";
-            description = "Details for this achievement Will be revealed once unlocked";
-            displayedIconUrl = "pack://application:,,,/SLAM;component/Resources/hidden.png";
+            bool showHidden = RevealHiddenBtn != null && RevealHiddenBtn.IsChecked == true;
+            if (!showHidden) {
+              name = "Hidden Achievement";
+              description = "Details for this achievement Will be revealed once unlocked";
+              displayedIconUrl = "pack://application:,,,/SLAM;component/Resources/hidden.png";
+            }
           }
           var avm = new AchievementViewModel {
             Id = def.Id,
@@ -350,6 +353,10 @@ namespace SAM.Picker.Modern {
       int unlocked = _Achievements.Count(x => x.IsAchieved);
       int total = _Achievements.Count;
       int locked = total - unlocked;
+      if (AchievementProgressBar != null) {
+        AchievementProgressBar.Visibility = Visibility.Visible;
+        AchievementProgressBar.Value = total > 0 ? (double)unlocked / total * 100 : 0;
+      }
       if (anyProtected) {
         AreModificationsAllowed = false;
         SharedStatusText.Text = "These achievements are protected. Can't modify them through SLAM.";
@@ -520,6 +527,7 @@ namespace SAM.Picker.Modern {
         if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
         if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
         if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
+        if (AchievementProgressBar != null) AchievementProgressBar.Visibility = Visibility.Collapsed;
       }
       GameDetailsView.Visibility = Visibility.Collapsed;
       HomeView.Visibility = Visibility.Visible;
