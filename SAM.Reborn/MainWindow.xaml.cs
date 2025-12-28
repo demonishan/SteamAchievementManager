@@ -305,11 +305,11 @@ namespace SAM.Picker.Modern {
         _UserStatsReceivedCallback.OnRun += (p) => {
           Dispatcher.Invoke(() => {
             if (p.Result == 1) {
-                try { FetchAchievements(); } 
-                catch (Exception ex) {
-                  DisplayAlert("Error fetching achievements: " + ex.Message, true);
-                  LoadingOverlay.Visibility = Visibility.Collapsed;
-                }
+              try { FetchAchievements(); } 
+              catch (Exception ex) {
+                DisplayAlert("Error fetching achievements: " + ex.Message, true);
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+              }
             }
             else {
               SharedStatusText.Text = $"Steam error {p.Result} (UserStatsReceived).";
