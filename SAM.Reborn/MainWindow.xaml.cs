@@ -7,15 +7,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using System.Xml.XPath;
-using System.Windows.Media;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.Threading.Tasks;
+using System.Xml.XPath;
 using SAM.API;
 namespace SAM.Picker.Modern {
   public partial class MainWindow : Window {
@@ -96,8 +96,8 @@ namespace SAM.Picker.Modern {
             }
           }
         } catch {
-            pairs.Clear();
-            pairs.Add(new KeyValuePair<uint, string>(480, "normal"));
+          pairs.Clear();
+          pairs.Add(new KeyValuePair<uint, string>(480, "normal"));
         }
         var fetchedGames = new List<GameInfo>();
         foreach (var kv in pairs) {
@@ -137,7 +137,6 @@ namespace SAM.Picker.Modern {
         } catch { }
       });
     }
-    
     private async Task ProcessGameImage(GameInfo game, WebClient client, string cacheDir) {
       if (game.CachedIcon != null) return;
       var path = Path.Combine(cacheDir, $"{game.Id}.jpg");
@@ -198,16 +197,23 @@ namespace SAM.Picker.Modern {
     private uint _SelectedGameId;
     private SAM.API.UserStatsReceived _UserStatsReceivedCallback;
     private void Game_Click(object sender, MouseButtonEventArgs e) {
-      if (sender is FrameworkElement element && element.DataContext is GameViewModel game) {
-        _SelectedGameId = game.Id;
-        SelectedGameName.Text = game.Name;
-        if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
-        Title = $"{game.Name} - SLAM";
-        HomeView.Visibility = Visibility.Collapsed;
-        GameDetailsView.Visibility = Visibility.Visible;
-        SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
-        SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
-        LoadGameData(true);
+      try {
+        if (sender is FrameworkElement element && element.DataContext is GameViewModel game) {
+          _SelectedGameId = game.Id;
+          SelectedGameName.Text = game.Name;
+          if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
+          Title = $"{game.Name} - SLAM";
+          HomeView.Visibility = Visibility.Collapsed;
+          GameDetailsView.Visibility = Visibility.Visible;
+          SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
+          SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
+          LoadGameData(true);
+        }
+      } catch (Exception ex) {
+        DisplayAlert($"Error switching game: {ex.Message}", true);
+        SAM.Picker.Modern.App.LogCrash(ex, "Game_Click");
+        HomeView.Visibility = Visibility.Visible;
+        GameDetailsView.Visibility = Visibility.Collapsed;
       }
     }
     private void ClearAchievementSearch_Click(object sender, RoutedEventArgs e) => AchievementSearchBox.Text = string.Empty;
@@ -253,7 +259,8 @@ namespace SAM.Picker.Modern {
         }
         else FilterUnlockedBtn.IsChecked = true;
       }
-      RefreshAchievementFilter(); UpdateTimerMetadata();
+      RefreshAchievementFilter();
+      UpdateTimerMetadata();
     }
     private void RefreshAchievementFilter() {
       if (_AchievementView == null) return;
@@ -272,61 +279,70 @@ namespace SAM.Picker.Modern {
       _AchievementView.Refresh();
     }
     private void LoadGameData(bool resetFilters = true) {
-      IsTimerMode = false;
-      _AchievementView = CollectionViewSource.GetDefaultView(_Achievements);
-      AchievementList.ItemsSource = _AchievementView;
-      if (resetFilters) {
-        if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
-        if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
-        if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
-        if (RevealHiddenBtn != null) {
-          RevealHiddenBtn.IsChecked = false;
-          RevealHiddenBtn.Visibility = Visibility.Collapsed;
-        }
-        if (SortFilter != null) SortFilter.SelectedIndex = 0;
-        if (AchievementSearchBox != null) AchievementSearchBox.Text = string.Empty;
-        ApplySort();
-      } else {
-        RefreshAchievementFilter();
-        ApplySort();
-      }
-      _Achievements.Clear();
-      LoadingOverlay.Visibility = Visibility.Visible;
-      SharedStatusText.Text = "Switching Steam context...";
-      _CallbackTimer.Stop();
       try {
-        _SteamClient?.Dispose();
-        _SteamClient = null;
-        SAM.API.Steam.Unload();
-        _SteamClient = new Client();
-        _SteamClient.Initialize(_SelectedGameId);
-        _UserStatsReceivedCallback = _SteamClient.CreateAndRegisterCallback<SAM.API.UserStatsReceived>();
-        _UserStatsReceivedCallback.OnRun += (p) => {
-          Dispatcher.Invoke(() => {
-            if (p.Result == 1) {
-              try { FetchAchievements(); } 
-              catch (Exception ex) {
-                DisplayAlert("Error fetching achievements: " + ex.Message, true);
+        IsTimerMode = false;
+        _AchievementView = CollectionViewSource.GetDefaultView(_Achievements);
+        AchievementList.ItemsSource = _AchievementView;
+        if (resetFilters) {
+          if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
+          if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
+          if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
+          if (RevealHiddenBtn != null) {
+            RevealHiddenBtn.IsChecked = false;
+            RevealHiddenBtn.Visibility = Visibility.Collapsed;
+          }
+          if (SortFilter != null) SortFilter.SelectedIndex = 0;
+          if (AchievementSearchBox != null) AchievementSearchBox.Text = string.Empty;
+          ApplySort();
+        } else {
+          RefreshAchievementFilter();
+          ApplySort();
+        }
+        _Achievements.Clear();
+        LoadingOverlay.Visibility = Visibility.Visible;
+        SharedStatusText.Text = "Switching Steam context...";
+        _CallbackTimer.Stop();
+        try {
+          _SteamClient?.Dispose();
+          _SteamClient = null;
+          SAM.API.Steam.Unload();
+          _SteamClient = new Client();
+          _SteamClient.Initialize(_SelectedGameId);
+          _UserStatsReceivedCallback = _SteamClient.CreateAndRegisterCallback<SAM.API.UserStatsReceived>();
+          _UserStatsReceivedCallback.OnRun += (p) => {
+            Dispatcher.Invoke(() => {
+              if (p.Result == 1) {
+                try { FetchAchievements(); }
+                catch (Exception ex) {
+                  DisplayAlert("Error fetching achievements: " + ex.Message, true);
+                  SAM.Picker.Modern.App.LogCrash(ex, "LoadGameData_FetchAchievements");
+                  LoadingOverlay.Visibility = Visibility.Collapsed;
+                }
+              }
+              else {
+                SharedStatusText.Text = $"Steam error {p.Result} (UserStatsReceived).";
                 LoadingOverlay.Visibility = Visibility.Collapsed;
               }
-            }
-            else {
-              SharedStatusText.Text = $"Steam error {p.Result} (UserStatsReceived).";
-              LoadingOverlay.Visibility = Visibility.Collapsed;
-            }
-          });
-        };
+            });
+          };
+        } catch (Exception ex) {
+          DisplayAlert("Failed to switch Steam context: " + ex.Message, true);
+          SAM.Picker.Modern.App.LogCrash(ex, "LoadGameData_SteamSwitch");
+          LoadingOverlay.Visibility = Visibility.Collapsed;
+          _CallbackTimer.Start();
+          return;
+        }
+        _CallbackTimer.Start();
+        var steamId = _SteamClient.SteamUser.GetSteamId();
+        _SteamClient.SteamUserStats.RequestUserStats(steamId);
+        _SteamClient.SteamUserStats.RequestGlobalAchievementPercentages();
+        SharedStatusText.Text = "Requesting stats from Steam...";
       } catch (Exception ex) {
-        DisplayAlert("Failed to switch Steam context: " + ex.Message, true);
+        DisplayAlert($"Critical error loading game data: {ex.Message}", true);
+        SAM.Picker.Modern.App.LogCrash(ex, "LoadGameData_Critical");
         LoadingOverlay.Visibility = Visibility.Collapsed;
         _CallbackTimer.Start();
-        return;
       }
-      _CallbackTimer.Start();
-      var steamId = _SteamClient.SteamUser.GetSteamId();
-      _SteamClient.SteamUserStats.RequestUserStats(steamId);
-      _SteamClient.SteamUserStats.RequestGlobalAchievementPercentages();
-      SharedStatusText.Text = "Requesting stats from Steam...";
     }
     private void FetchAchievements() {
       var definitions = new List<AchievementDefinition>();
@@ -461,8 +477,8 @@ namespace SAM.Picker.Modern {
                 if (ach.IconUrl.StartsWith("pack://")) {
                   await Dispatcher.InvokeAsync(() => {
                     try {
-                      ach.Icon = new BitmapImage(new Uri(ach.IconUrl)); 
-                    } catch { } 
+                      ach.Icon = new BitmapImage(new Uri(ach.IconUrl));
+                    } catch { }
                   });
                 }
                 continue;
@@ -490,14 +506,14 @@ namespace SAM.Picker.Modern {
                       ach.Icon = bitmap;
                     } else if (ach.IsHiddenLocked && ach.Icon == null && ach.IconUrl.StartsWith("pack://")) {
                       try {
-                        ach.Icon = new BitmapImage(new Uri(ach.IconUrl)); 
+                        ach.Icon = new BitmapImage(new Uri(ach.IconUrl));
                       } catch { }
                     }
                   } catch { }
                 }, DispatcherPriority.Background);
               } else {
                 await Dispatcher.InvokeAsync(() => {
-                  ach.IsBroken = true; 
+                  ach.IsBroken = true;
                 }, DispatcherPriority.Background);
               }
             }
@@ -544,42 +560,55 @@ namespace SAM.Picker.Modern {
       return kv.AsString(defaultValue);
     }
     private void Back_Click(object sender, RoutedEventArgs e) {
-      AreModificationsAllowed = true;
-      UpdateProtectionState();
-      DisplayAlert("Select a game to manage achievements.", false);
-      if (_IsTimerActive || IsTimerMode) {
-        _IsTimerActive = false;
-        _IsTimerPaused = false;
-        IsTimerRunning = false;
-        IsTimerMode = false;
-        if (EnableTimerText != null) EnableTimerText.Text = "Timer Mode";
-        if (BulkActionsButton != null) BulkActionsButton.Visibility = Visibility.Visible;
-        if (RefreshButton != null) RefreshButton.Visibility = Visibility.Visible;
-        if (SaveButton != null) SaveButton.Visibility = Visibility.Visible;
-        if (FilterButtonsPanel != null) FilterButtonsPanel.Visibility = Visibility.Visible;
-        if (FilterLockedBtn != null) FilterLockedBtn.Visibility = Visibility.Visible;
-        if (FilterUnlockedBtn != null) FilterUnlockedBtn.Visibility = Visibility.Visible;
-        if (StartTimerButton != null) StartTimerButton.Visibility = Visibility.Collapsed;
-        if (RandomTimerButton != null) RandomTimerButton.Visibility = Visibility.Collapsed;
-        if (EnableTimerButton != null) EnableTimerButton.Visibility = Visibility.Visible;
-        if (SortFilter != null) SortFilter.Visibility = Visibility.Visible;
-        if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
-        if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
-        if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
-        if (AchievementProgressBar != null) AchievementProgressBar.Visibility = Visibility.Collapsed;
+      try {
+        AreModificationsAllowed = true;
+        UpdateProtectionState();
+        DisplayAlert("Select a game to manage achievements.", false);
+        if (_IsTimerActive || IsTimerMode) {
+          _IsTimerActive = false;
+          _IsTimerPaused = false;
+          IsTimerRunning = false;
+          IsTimerMode = false;
+          if (EnableTimerText != null) EnableTimerText.Text = "Timer Mode";
+          if (BulkActionsButton != null) BulkActionsButton.Visibility = Visibility.Visible;
+          if (RefreshButton != null) RefreshButton.Visibility = Visibility.Visible;
+          if (SaveButton != null) SaveButton.Visibility = Visibility.Visible;
+          if (FilterButtonsPanel != null) FilterButtonsPanel.Visibility = Visibility.Visible;
+          if (FilterLockedBtn != null) FilterLockedBtn.Visibility = Visibility.Visible;
+          if (FilterUnlockedBtn != null) FilterUnlockedBtn.Visibility = Visibility.Visible;
+          if (StartTimerButton != null) StartTimerButton.Visibility = Visibility.Collapsed;
+          if (RandomTimerButton != null) RandomTimerButton.Visibility = Visibility.Collapsed;
+          if (EnableTimerButton != null) EnableTimerButton.Visibility = Visibility.Visible;
+          if (SortFilter != null) SortFilter.Visibility = Visibility.Visible;
+          if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
+          if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
+          if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
+          if (AchievementProgressBar != null) AchievementProgressBar.Visibility = Visibility.Collapsed;
+        }
+        GameDetailsView.Visibility = Visibility.Collapsed;
+        HomeView.Visibility = Visibility.Visible;
+        if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
+        Title = "SLAM";
+        _CallbackTimer.Stop();
+        try {
+          _SteamClient?.Dispose();
+          _SteamClient = null;
+          SAM.API.Steam.Unload();
+          _SteamClient = new Client();
+          _SteamClient.Initialize(0);
+        } catch (Exception ex) {
+          DisplayAlert($"Failed to reinitialize Steam on back: {ex.Message}", true);
+          SAM.Picker.Modern.App.LogCrash(ex, "Back_Click_SteamReinit");
+          _SteamClient = null;
+          _CallbackTimer.Start();
+          return;
+        }
+        _CallbackTimer.Start();
+        LoadData();
+      } catch (Exception ex) {
+        DisplayAlert($"Error returning to game list: {ex.Message}", true);
+        SAM.Picker.Modern.App.LogCrash(ex, "Back_Click");
       }
-      GameDetailsView.Visibility = Visibility.Collapsed;
-      HomeView.Visibility = Visibility.Visible;
-      if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
-      Title = "SLAM";
-      _CallbackTimer.Stop();
-      _SteamClient?.Dispose();
-      _SteamClient = null;
-      SAM.API.Steam.Unload();
-      _SteamClient = new Client();
-      _SteamClient.Initialize(0);
-      _CallbackTimer.Start();
-      LoadData();
     }
     private void RefreshGame_Click(object sender, RoutedEventArgs e) => LoadGameData(false);
     private void Store_Click(object sender, RoutedEventArgs e) {
@@ -588,8 +617,8 @@ namespace SAM.Picker.Modern {
         if (!_SteamClient.SteamUserStats.SetAchievement(ach.Id, ach.IsAchieved)) success = false;
       }
       if (success && _SteamClient.SteamUserStats.StoreStats()) {
-        DisplayAlert("Changes stored successfully!", false); 
-        LoadGameData(false); 
+        DisplayAlert("Changes stored successfully!", false);
+        LoadGameData(false);
       }
       else DisplayAlert("Failed to store changes.", true);
     }
@@ -597,15 +626,19 @@ namespace SAM.Picker.Modern {
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void Maximize_Click(object sender, RoutedEventArgs e) { WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; }
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
-    private void Refresh_Click(object sender, RoutedEventArgs e) { 
-      _AllGames.Clear(); 
-      HomeLoadingOverlay.Visibility = Visibility.Visible; 
-      LoadData(); 
+    private void Refresh_Click(object sender, RoutedEventArgs e) {
+      _AllGames.Clear();
+      HomeLoadingOverlay.Visibility = Visibility.Visible;
+      LoadData();
     }
     private void Filter_Click(object sender, RoutedEventArgs e) {
       if (sender is Button btn && btn.ContextMenu != null) {
-        FilterGames.IsChecked = _WantGames; FilterMods.IsChecked = _WantMods; FilterDemos.IsChecked = _WantDemos; FilterJunk.IsChecked = _WantJunk;
-        btn.ContextMenu.PlacementTarget = btn; btn.ContextMenu.IsOpen = true;
+        FilterGames.IsChecked = _WantGames;
+        FilterMods.IsChecked = _WantMods;
+        FilterDemos.IsChecked = _WantDemos;
+        FilterJunk.IsChecked = _WantJunk;
+        btn.ContextMenu.PlacementTarget = btn;
+        btn.ContextMenu.IsOpen = true;
       }
     }
     private void FilterOption_Click(object sender, RoutedEventArgs e) {
@@ -620,10 +653,10 @@ namespace SAM.Picker.Modern {
     public static readonly DependencyProperty IsTimerModeProperty = DependencyProperty.Register("IsTimerMode", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
     public bool IsTimerMode {
       get { return (bool)GetValue(IsTimerModeProperty); }
-      set { 
-        SetValue(IsTimerModeProperty, value); 
+      set {
+        SetValue(IsTimerModeProperty, value);
         UpdateTimerUIState();
-      } 
+      }
     }
     private void UpdateTimerUIState() {
       var visibility = IsTimerMode ? Visibility.Collapsed : Visibility.Visible;
@@ -641,12 +674,8 @@ namespace SAM.Picker.Modern {
     }
     public static readonly DependencyProperty IsTimerRunningProperty = DependencyProperty.Register("IsTimerRunning", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
     public bool IsTimerRunning {
-      get {
-        return (bool)GetValue(IsTimerRunningProperty); 
-      } 
-      set { 
-        SetValue(IsTimerRunningProperty, value); 
-      } 
+      get { return (bool)GetValue(IsTimerRunningProperty); }
+      set { SetValue(IsTimerRunningProperty, value); }
     }
     public static readonly DependencyProperty AreModificationsAllowedProperty = DependencyProperty.Register("AreModificationsAllowed", typeof(bool), typeof(MainWindow), new PropertyMetadata(true));
     public bool AreModificationsAllowed {
@@ -656,7 +685,7 @@ namespace SAM.Picker.Modern {
     private void EnableTimer_Click(object sender, RoutedEventArgs e) {
       IsTimerMode = !IsTimerMode;
       if (IsTimerMode) {
-        if (_AchievementView != null) { _AchievementView.Refresh(); }
+        if (_AchievementView != null) _AchievementView.Refresh();
         if (FilterAllBtn != null) FilterAllBtn.IsChecked = false;
         if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = true;
         if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
@@ -664,7 +693,9 @@ namespace SAM.Picker.Modern {
         RefreshAchievementFilter();
         if (SharedStatusText != null) SharedStatusText.Text = "Drag and drop the achievements, set the delay in minutes, and 'Start Timer'.";
       } else {
-        _IsTimerActive = false; _IsTimerPaused = false; UpdateTimerButtonState();
+        _IsTimerActive = false;
+        _IsTimerPaused = false;
+        UpdateTimerButtonState();
         if (SharedStatusText != null) SharedStatusText.Text = "Ready";
         if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
         if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
@@ -673,11 +704,15 @@ namespace SAM.Picker.Modern {
       }
     }
     private void RandomTimerButton_Click(object sender, RoutedEventArgs e) {
-      if (RandomTimerPopup != null) RandomTimerPopup.IsOpen = true; 
+      if (RandomTimerPopup != null) RandomTimerPopup.IsOpen = true;
     }
     private void ApplyRandomTimer_Click(object sender, RoutedEventArgs e) {
       if (int.TryParse(RandMinInput.Text, out int min) && int.TryParse(RandMaxInput.Text, out int max)) {
-        if (min > max) { int temp = min; min = max; max = temp; }
+        if (min > max) {
+          int temp = min;
+          min = max;
+          max = temp;
+        }
         var random = new Random();
         foreach (var ach in _Achievements) {
           if (!ach.IsAchieved) ach.TimerMinutes = random.Next(min, max + 1).ToString();
@@ -730,12 +765,15 @@ namespace SAM.Picker.Modern {
           else DisplayAlert($"Timer sequence complete. {processedCount} achievements unlocked.", false);
         }
       } catch (Exception ex) {
-        DisplayAlert($"Error running timer: {ex.Message}", true); 
+        DisplayAlert($"Error running timer: {ex.Message}", true);
       }
       finally { SetTimerUIState(false); }
     }
     private void SetTimerUIState(bool active) {
-      _IsTimerActive = active; _IsTimerPaused = false; IsTimerRunning = active; UpdateTimerButtonState();
+      _IsTimerActive = active;
+      _IsTimerPaused = false;
+      IsTimerRunning = active;
+      UpdateTimerButtonState();
       var visibility = active ? Visibility.Collapsed : Visibility.Visible;
       if (SortFilter != null) SortFilter.Visibility = visibility;
       if (EnableTimerButton != null) EnableTimerButton.Visibility = visibility;
@@ -754,20 +792,18 @@ namespace SAM.Picker.Modern {
         if (!_IsTimerActive) break;
         if (ach.IsAchieved) continue;
         if (!double.TryParse(ach.TimerMinutes, out double minutes) || minutes < 0) continue;
-        
-        // If minutes is 0, unlock immediately without delay
         if (minutes == 0) {
           if (!_IsTimerActive) break;
-          ach.IsAchieved = true; count++;
+          ach.IsAchieved = true;
+          count++;
           SharedStatusText.Text = $"Unlocked '{ach.Name}'!";
           if (_SteamClient.SteamUserStats.SetAchievement(ach.Id, true)) _SteamClient.SteamUserStats.StoreStats();
           _AchievementView.Refresh();
           UpdateTimerMetadata();
           UpdateProgressBar();
-          await Task.Delay(500); // Brief delay before moving to next achievement
+          await Task.Delay(500);
           continue;
         }
-        
         int totalSeconds = (int)(minutes * 60);
         while (totalSeconds > 0) {
           if (!_IsTimerActive) break;
@@ -782,7 +818,8 @@ namespace SAM.Picker.Modern {
           totalSeconds--;
         }
         if (!_IsTimerActive) break;
-        ach.IsAchieved = true; count++;
+        ach.IsAchieved = true;
+        count++;
         SharedStatusText.Text = $"Unlocked '{ach.Name}'!";
         if (_SteamClient.SteamUserStats.SetAchievement(ach.Id, true)) _SteamClient.SteamUserStats.StoreStats();
         _AchievementView.Refresh();
@@ -815,12 +852,10 @@ namespace SAM.Picker.Modern {
       if (!IsTimerMode || IsTimerRunning) return;
       var lcv = _AchievementView as ListCollectionView;
       bool isSorted = _AchievementView.SortDescriptions.Count > 0 || (lcv != null && lcv.CustomSort != null);
-
       if (isSorted) {
         var sorted = _AchievementView.Cast<AchievementViewModel>().ToList();
         _Achievements.Clear();
         foreach (var item in sorted) _Achievements.Add(item);
-        
         if (SortFilter != null) SortFilter.SelectedIndex = 0;
       }
       if (e.Data.GetDataPresent("myFormat")) {
@@ -848,7 +883,6 @@ namespace SAM.Picker.Modern {
           ach.ETA = $"{projection:t}";
           projection = projection.AddSeconds(1);
         } else if (!ach.IsAchieved && double.TryParse(ach.TimerMinutes, out minutes) && minutes == 0) {
-          // For immediate unlock (0 minutes), use the current projection time
           ach.ETA = $"{projection:t}";
         } else ach.ETA = "";
       }
@@ -887,9 +921,25 @@ namespace SAM.Picker.Modern {
   public class AchievementViewModel : INotifyPropertyChanged {
     public string Id { get; set; }
     private string _Name;
-    public string Name { get => _Name; set { if (_Name != value) { _Name = value; OnPropertyChanged(nameof(Name)); } } }
+    public string Name {
+      get => _Name;
+      set {
+        if (_Name != value) {
+          _Name = value;
+          OnPropertyChanged(nameof(Name));
+        }
+      }
+    }
     private string _Description;
-    public string Description { get => _Description; set { if (_Description != value) { _Description = value; OnPropertyChanged(nameof(Description)); } } }
+    public string Description {
+      get => _Description;
+      set {
+        if (_Description != value) {
+          _Description = value;
+          OnPropertyChanged(nameof(Description));
+        }
+      }
+    }
     public string OriginalName { get; set; }
     public string OriginalDescription { get; set; }
     public float GlobalPercent { get; set; }
@@ -978,9 +1028,7 @@ namespace SAM.Picker.Modern {
         if (!a.UnlockTime.HasValue) return 1;
         if (!b.UnlockTime.HasValue) return -1;
         return _descending ? b.UnlockTime.Value.CompareTo(a.UnlockTime.Value) : a.UnlockTime.Value.CompareTo(b.UnlockTime.Value);
-      } else {
-        return b.GlobalPercent.CompareTo(a.GlobalPercent);
-      }
+      } else return b.GlobalPercent.CompareTo(a.GlobalPercent);
     }
   }
   public class RarityColorConverter : IValueConverter {
@@ -988,13 +1036,11 @@ namespace SAM.Picker.Modern {
       if (value is float percent) {
         string mode = parameter as string;
         if (mode == "Blur") return (percent < 1) ? 25.0 : 8.0;
-        
         string hex = "#FF8000";
         if (percent >= 40) hex = "#CCCCCC";
         else if (percent >= 20) hex = "#1EFF00";
         else if (percent >= 5) hex = "#0070DD";
         else if (percent >= 1) hex = "#A335EE";
-        
         Color color = (Color)ColorConverter.ConvertFromString(hex);
         if (mode == "Color") return color;
         return new SolidColorBrush(color);
