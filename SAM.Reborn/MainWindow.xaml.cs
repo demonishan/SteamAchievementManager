@@ -28,8 +28,22 @@ namespace SAM.Picker.Modern {
     private bool _WantJunk = false;
     private DispatcherTimer _CallbackTimer;
     private ICollectionView _AchievementView;
+    private string _AppVersion = "";
     public MainWindow() {
       InitializeComponent();
+      try {
+        var entry = System.Reflection.Assembly.GetEntryAssembly();
+        string ver = null;
+        if (entry != null) {
+          var fvi = FileVersionInfo.GetVersionInfo(entry.Location);
+          ver = fvi.FileVersion ?? fvi.ProductVersion ?? entry.GetName().Version?.ToString();
+        }
+        if (string.IsNullOrEmpty(ver)) ver = "0.0.0";
+        var parts = ver.Split('.');
+        _AppVersion = parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : ver;
+        if (WindowTitleText != null) WindowTitleText.Text = $"Super Lazy Achievement Manager v{_AppVersion}";
+        Title = $"SLAM v{_AppVersion}";
+      } catch { _AppVersion = ""; }
       _SteamClient = new Client();
       try {
         _SteamClient.Initialize(0);
@@ -43,8 +57,22 @@ namespace SAM.Picker.Modern {
       this.StateChanged += OnWindowStateChanged;
       _CallbackTimer = new DispatcherTimer();
       _CallbackTimer.Interval = TimeSpan.FromMilliseconds(100);
-      _CallbackTimer.Tick += (s, e) => _SteamClient.RunCallbacks(false);
+      _CallbackTimer.Tick += (s, e) => {
+        try { _SteamClient?.RunCallbacks(false); }
+        catch (Exception ex) { SAM.Picker.Modern.App.LogCrash(ex, "CallbackTimer_RunCallbacks"); }
+      };
       _CallbackTimer.Start();
+      AppDomain.CurrentDomain.UnhandledException += (s, e) => {
+        if (e.ExceptionObject is Exception ex) SAM.Picker.Modern.App.LogCrash(ex, "AppDomain_UnhandledException");
+      };
+      TaskScheduler.UnobservedTaskException += (s, e) => {
+        SAM.Picker.Modern.App.LogCrash(e.Exception, "TaskScheduler_UnobservedTaskException");
+        e.SetObserved();
+      };
+      if (Application.Current != null) Application.Current.DispatcherUnhandledException += (s, e) => {
+        SAM.Picker.Modern.App.LogCrash(e.Exception, "DispatcherUnhandledException");
+        e.Handled = true;
+      };
       LoadData();
     }
     private void DisplayAlert(string message, bool isError) {
@@ -201,8 +229,18 @@ namespace SAM.Picker.Modern {
         if (sender is FrameworkElement element && element.DataContext is GameViewModel game) {
           _SelectedGameId = game.Id;
           SelectedGameName.Text = game.Name;
-          if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
-          Title = $"{game.Name} - SLAM";
+          if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager v{_AppVersion}";
+          Title = $"{game.Name} - SLAM v{_AppVersion}";
+          if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
+          if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
+          if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
+          if (RevealHiddenBtn != null) RevealHiddenBtn.IsChecked = false;
+          if (SortFilter != null) SortFilter.SelectedIndex = 0;
+          if (AchievementSearchBox != null) AchievementSearchBox.Text = string.Empty;
+          if (_AchievementView != null) {
+            _AchievementView.Refresh();
+            ApplySort();
+          }
           HomeView.Visibility = Visibility.Collapsed;
           GameDetailsView.Visibility = Visibility.Visible;
           SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
@@ -587,8 +625,8 @@ namespace SAM.Picker.Modern {
         }
         GameDetailsView.Visibility = Visibility.Collapsed;
         HomeView.Visibility = Visibility.Visible;
-        if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
-        Title = "SLAM";
+        if (WindowTitleText != null) WindowTitleText.Text = $"Super Lazy Achievement Manager v{_AppVersion}";
+        Title = $"SLAM v{_AppVersion}";
         _CallbackTimer.Stop();
         try {
           _SteamClient?.Dispose();
