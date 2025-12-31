@@ -41,8 +41,9 @@ namespace SAM.Picker.Modern {
         if (string.IsNullOrEmpty(ver)) ver = "0.0.0";
         var parts = ver.Split('.');
         _AppVersion = parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : ver;
-        if (WindowTitleText != null) WindowTitleText.Text = $"Super Lazy Achievement Manager v{_AppVersion}";
-        Title = $"SLAM v{_AppVersion}";
+        if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
+        if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
+        Title = "SAM";
       } catch { _AppVersion = ""; }
       _SteamClient = new Client();
       try {
@@ -229,8 +230,9 @@ namespace SAM.Picker.Modern {
         if (sender is FrameworkElement element && element.DataContext is GameViewModel game) {
           _SelectedGameId = game.Id;
           SelectedGameName.Text = game.Name;
-          if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager v{_AppVersion}";
-          Title = $"{game.Name} - SLAM v{_AppVersion}";
+          if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
+          if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
+          Title = $"{game.Name} - SAM";
           if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
           if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
           if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
@@ -635,8 +637,9 @@ namespace SAM.Picker.Modern {
         }
         GameDetailsView.Visibility = Visibility.Collapsed;
         HomeView.Visibility = Visibility.Visible;
-        if (WindowTitleText != null) WindowTitleText.Text = $"Super Lazy Achievement Manager v{_AppVersion}";
-        Title = $"SLAM v{_AppVersion}";
+        if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
+        if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
+        Title = "SAM";
         _CallbackTimer.Stop();
         try {
           _SteamClient?.Dispose();

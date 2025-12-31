@@ -248,7 +248,10 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <Grid Grid.Row="0" Background="#252526">
-      <TextBlock x:Name="WindowTitleText" Text="Super Lazy Achievement Manager" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="SemiBold" FontSize="14" Foreground="#DDDDDD"/>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
+        <TextBlock x:Name="WindowTitleText" Text="Super Lazy Achievement Manager" FontWeight="SemiBold" FontSize="14" Foreground="#DDDDDD"/>
+        <TextBlock x:Name="WindowVersionText" Text="v0.0.0" FontSize="10" Foreground="#666" Margin="5,2,0,0" VerticalAlignment="Center"/>
+      </StackPanel>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Content="&#xE921;" Width="46" Click="Minimize_Click" Style="{StaticResource TitleBarButtonStyle}" FontFamily="Segoe MDL2 Assets" FontSize="10" WindowChrome.IsHitTestVisibleInChrome="True"/>
         <Button x:Name="MaximizeBtn" Content="&#xE922;" Width="46" Click="Maximize_Click" Style="{StaticResource TitleBarButtonStyle}" FontFamily="Segoe MDL2 Assets" FontSize="10" WindowChrome.IsHitTestVisibleInChrome="True"/>
