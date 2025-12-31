@@ -18,6 +18,40 @@ using System.Windows.Threading;
 using System.Xml.XPath;
 using SAM.API;
 namespace SAM.Picker.Modern {
+  public static class ImageCacheHelper {
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, BitmapImage> _memoryCache = new System.Collections.Concurrent.ConcurrentDictionary<string, BitmapImage>();
+    public static async Task<BitmapImage> GetImageAsync(string url, string cachePath) {
+      if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(cachePath)) return null;
+      if (_memoryCache.TryGetValue(cachePath, out var cachedImage)) return cachedImage;
+      var dir = System.IO.Path.GetDirectoryName(cachePath);
+      if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
+      if (!System.IO.File.Exists(cachePath) || new System.IO.FileInfo(cachePath).Length == 0) {
+        try {
+          using (var client = new System.Net.WebClient()) {
+            var data = await client.DownloadDataTaskAsync(url);
+            if (data.Length > 0) System.IO.File.WriteAllBytes(cachePath, data);
+          }
+        }
+        catch { }
+      }
+      if (System.IO.File.Exists(cachePath) && new System.IO.FileInfo(cachePath).Length > 0) {
+        try {
+          BitmapImage bitmap = null;
+          await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => {
+            bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(cachePath, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+          });
+          _memoryCache[cachePath] = bitmap;
+          return bitmap;
+        }
+        catch { }
+      }
+      return null;
+    }
+  }
   public partial class MainWindow : Window {
     private Client _SteamClient;
     private List<GameInfo> _AllGames = new List<GameInfo>();
@@ -43,7 +77,7 @@ namespace SAM.Picker.Modern {
         _AppVersion = parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : ver;
         if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
         if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
-        Title = "SAM";
+        Title = "SLAM";
       } catch { _AppVersion = ""; }
       _SteamClient = new Client();
       try {
@@ -169,34 +203,24 @@ namespace SAM.Picker.Modern {
     private async Task ProcessGameImage(GameInfo game, WebClient client, string cacheDir) {
       if (game.CachedIcon != null) return;
       var path = Path.Combine(cacheDir, $"{game.Id}.jpg");
-      bool needsDownload = !File.Exists(path) || new FileInfo(path).Length == 0;
-      if (needsDownload) {
+      BitmapImage bitmap = null;
+      // Try main image URL
+      bitmap = await ImageCacheHelper.GetImageAsync(game.ImageUrl, path);
+      // If failed, try fallback from Steam API
+      if (bitmap == null) {
         try {
-          var data = await client.DownloadDataTaskAsync(new Uri(game.ImageUrl));
-          if (data.Length > 0) File.WriteAllBytes(path, data);
-        } catch {
-          if (!File.Exists(path) || new FileInfo(path).Length == 0) {
-            try {
-              var json = await client.DownloadStringTaskAsync($"https://store.steampowered.com/api/appdetails?appids={game.Id}");
-              var match = System.Text.RegularExpressions.Regex.Match(json, "\"header_image\"\\s*:\\s*\"(.*?)\"");
-              if (match.Success) {
-                var url = match.Groups[1].Value.Replace("\\/", "/");
-                var data = await client.DownloadDataTaskAsync(new Uri(url));
-                if (data.Length > 0) File.WriteAllBytes(path, data);
-              }
-            } catch { }
+          var json = await client.DownloadStringTaskAsync($"https://store.steampowered.com/api/appdetails?appids={game.Id}");
+          var match = System.Text.RegularExpressions.Regex.Match(json, "\"header_image\"\\s*:\\s*\"(.*?)\"");
+          if (match.Success) {
+            var url = match.Groups[1].Value.Replace("\\/", "/");
+            bitmap = await ImageCacheHelper.GetImageAsync(url, path);
           }
-        }
-        await Task.Delay(25);
+        } catch { }
       }
-      if (File.Exists(path) && new FileInfo(path).Length > 0) {
+      await Task.Delay(25);
+      if (bitmap != null) {
         await Dispatcher.InvokeAsync(() => {
           try {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(path, UriKind.Absolute);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
             game.CachedIcon = bitmap;
             var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
             if (vm != null) vm.Image = bitmap;
@@ -205,10 +229,10 @@ namespace SAM.Picker.Modern {
       } else {
         await Dispatcher.InvokeAsync(() => {
           try {
-              var bitmap = new BitmapImage(new Uri("pack://application:,,,/SLAM;component/Resources/image-not-found.png"));
-              game.CachedIcon = bitmap;
-              var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
-              if (vm != null) vm.Image = bitmap;
+            var fallback = new BitmapImage(new Uri("pack://application:,,,/SLAM;component/Resources/image-not-found.png"));
+            game.CachedIcon = fallback;
+            var vm = _FilteredGames.FirstOrDefault(x => x.Id == game.Id);
+            if (vm != null) vm.Image = fallback;
           } catch { }
         }, DispatcherPriority.Background);
       }
@@ -232,7 +256,7 @@ namespace SAM.Picker.Modern {
           SelectedGameName.Text = game.Name;
           if (WindowTitleText != null) WindowTitleText.Text = $"{game.Name} - Super Lazy Achievement Manager";
           if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
-          Title = $"{game.Name} - SAM";
+          Title = $"{game.Name} - SLAM";
           if (FilterAllBtn != null) FilterAllBtn.IsChecked = true;
           if (FilterLockedBtn != null) FilterLockedBtn.IsChecked = false;
           if (FilterUnlockedBtn != null) FilterUnlockedBtn.IsChecked = false;
@@ -245,6 +269,8 @@ namespace SAM.Picker.Modern {
           }
           HomeView.Visibility = Visibility.Collapsed;
           GameDetailsView.Visibility = Visibility.Visible;
+          // Show background image for selected game
+          SetGameBackgroundImage(game.Id);
           SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
           SharedStatusText.Text = $"Checking if you actually beat {game.Name}";
           LoadGameData(true);
@@ -520,52 +546,39 @@ namespace SAM.Picker.Modern {
         try {
           var cacheDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache", "achievements");
           if (!Directory.Exists(cacheDir)) Directory.CreateDirectory(cacheDir);
-          using (var client = new WebClient()) {
-            foreach (var ach in achievements) {
-              string urlToLoad = ach.RealIconUrl;
-              if (string.IsNullOrEmpty(urlToLoad) || urlToLoad.StartsWith("pack://")) {
-                if (ach.IconUrl.StartsWith("pack://")) {
-                  await Dispatcher.InvokeAsync(() => {
+          foreach (var ach in achievements) {
+            string urlToLoad = ach.RealIconUrl;
+            if (string.IsNullOrEmpty(urlToLoad) || urlToLoad.StartsWith("pack://")) {
+              if (ach.IconUrl.StartsWith("pack://")) {
+                await Dispatcher.InvokeAsync(() => {
+                  try {
+                    ach.Icon = new BitmapImage(new Uri(ach.IconUrl));
+                  } catch { }
+                });
+              }
+              continue;
+            }
+            var filename = System.IO.Path.GetFileName(new Uri(urlToLoad).LocalPath);
+            var path = Path.Combine(cacheDir, filename);
+            var bitmap = await ImageCacheHelper.GetImageAsync(urlToLoad, path);
+            await Task.Delay(20);
+            if (bitmap != null) {
+              await Dispatcher.InvokeAsync(() => {
+                try {
+                  ach.RealIcon = bitmap;
+                  if (!ach.IsHiddenLocked || (RevealHiddenBtn != null && RevealHiddenBtn.IsChecked == true)) {
+                    ach.Icon = bitmap;
+                  } else if (ach.IsHiddenLocked && ach.Icon == null && ach.IconUrl.StartsWith("pack://")) {
                     try {
                       ach.Icon = new BitmapImage(new Uri(ach.IconUrl));
                     } catch { }
-                  });
-                }
-                continue;
-              }
-              var filename = System.IO.Path.GetFileName(new Uri(urlToLoad).LocalPath);
-              var path = Path.Combine(cacheDir, filename);
-              bool needsDownload = !File.Exists(path) || new FileInfo(path).Length == 0;
-              if (needsDownload) {
-                try {
-                  var data = await client.DownloadDataTaskAsync(new Uri(urlToLoad));
-                  if (data.Length > 0) File.WriteAllBytes(path, data);
+                  }
                 } catch { }
-                await Task.Delay(20);
-              }
-              if (File.Exists(path) && new FileInfo(path).Length > 0) {
-                await Dispatcher.InvokeAsync(() => {
-                  try {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(path, UriKind.Absolute);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    ach.RealIcon = bitmap;
-                    if (!ach.IsHiddenLocked || (RevealHiddenBtn != null && RevealHiddenBtn.IsChecked == true)) {
-                      ach.Icon = bitmap;
-                    } else if (ach.IsHiddenLocked && ach.Icon == null && ach.IconUrl.StartsWith("pack://")) {
-                      try {
-                        ach.Icon = new BitmapImage(new Uri(ach.IconUrl));
-                      } catch { }
-                    }
-                  } catch { }
-                }, DispatcherPriority.Background);
-              } else {
-                await Dispatcher.InvokeAsync(() => {
-                  ach.IsBroken = true;
-                }, DispatcherPriority.Background);
-              }
+              }, DispatcherPriority.Background);
+            } else {
+              await Dispatcher.InvokeAsync(() => {
+                ach.IsBroken = true;
+              }, DispatcherPriority.Background);
             }
           }
         } catch { }
@@ -637,9 +650,14 @@ namespace SAM.Picker.Modern {
         }
         GameDetailsView.Visibility = Visibility.Collapsed;
         HomeView.Visibility = Visibility.Visible;
+        // Hide background image when returning to home
+        if (GameBackgroundImage != null) {
+          GameBackgroundImage.Source = null;
+          GameBackgroundImage.Visibility = Visibility.Collapsed;
+        }
         if (WindowTitleText != null) WindowTitleText.Text = "Super Lazy Achievement Manager";
         if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
-        Title = "SAM";
+        Title = "SLAM";
         _CallbackTimer.Stop();
         try {
           _SteamClient?.Dispose();
@@ -660,6 +678,53 @@ namespace SAM.Picker.Modern {
         DisplayAlert($"Error returning to game list: {ex.Message}", true);
         SAM.Picker.Modern.App.LogCrash(ex, "Back_Click");
       }
+    }
+
+    // Fetch and set the background image for the selected game
+    private async void SetGameBackgroundImage(uint appId)
+    {
+        if (GameBackgroundImage == null) return;
+        try
+        {
+          GameBackgroundImage.Visibility = Visibility.Collapsed;
+          string cacheDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache", "backgrounds");
+          string bgPath = System.IO.Path.Combine(cacheDir, $"{appId}.jpg");
+          string bgUrl = null;
+          using (var client = new System.Net.WebClient())
+          {
+            string url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
+            string json = await client.DownloadStringTaskAsync(url);
+            var match = System.Text.RegularExpressions.Regex.Match(json, "\\\"background\\\"\\s*:\\s*\\\"(.*?)\\\"");
+            if (match.Success)
+            {
+              bgUrl = match.Groups[1].Value.Replace("\\/", "/");
+            }
+          }
+          if (!string.IsNullOrEmpty(bgUrl))
+          {
+            var bitmap = await ImageCacheHelper.GetImageAsync(bgUrl, bgPath);
+            if (bitmap != null)
+            {
+              GameBackgroundImage.Source = bitmap;
+              GameBackgroundImage.Visibility = Visibility.Visible;
+            }
+            else
+            {
+              GameBackgroundImage.Source = null;
+              GameBackgroundImage.Visibility = Visibility.Collapsed;
+            }
+          }
+          else
+          {
+            GameBackgroundImage.Source = null;
+            GameBackgroundImage.Visibility = Visibility.Collapsed;
+          }
+        }
+        catch
+        {
+          GameBackgroundImage.Source = null;
+          GameBackgroundImage.Visibility = Visibility.Collapsed;
+        }
     }
     private void RefreshGame_Click(object sender, RoutedEventArgs e) => LoadGameData(false);
     private void Store_Click(object sender, RoutedEventArgs e) {

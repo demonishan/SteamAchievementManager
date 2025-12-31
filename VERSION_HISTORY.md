@@ -1,5 +1,9 @@
 ## Version History
 
+### 8.4.10 (2025-12-31)
+- Added background image on the achievement list.
+- Improved image caching logic (thread-safe, DRY, UI-thread safe).
+
 ### 8.4.9 (2026-12-28)
 - Feature: Added new sorting options to sort by Unlock Time (Newest/Oldest), prioritizing unlocked achievements while intelligently sorting remaining locked achievements by rarity.
 

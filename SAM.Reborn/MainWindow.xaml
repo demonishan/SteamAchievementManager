@@ -363,6 +363,8 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <!-- Background image for game details -->
+        <Image x:Name="GameBackgroundImage" Grid.RowSpan="3" Stretch="UniformToFill" Opacity="1" Visibility="Collapsed" Panel.ZIndex="0"/>
         <Grid Grid.Row="0" Margin="20,10,20,10">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -514,10 +516,10 @@
                 <Border CornerRadius="5" Margin="0,1" Padding="0,10">
                   <Border.Style>
                     <Style TargetType="Border">
-                      <Setter Property="Background" Value="#292e3b"/>
+                      <Setter Property="Background" Value="#80292e3b" />
                       <Style.Triggers>
                         <DataTrigger Binding="{Binding IsAchieved}" Value="True">
-                          <Setter Property="Background" Value="#20232a"/>
+                          <Setter Property="Background" Value="#20232a3b"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IsTimerMode}" Value="True">
                           <Setter Property="Padding" Value="0,5"/>
