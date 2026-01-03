@@ -18,8 +18,6 @@
   ```powershell
   dotnet build -c Release
   ```
-  This also stops any running `SLAM` process before building.
-- **Run**: Execute `Dist/SLAM.exe` (Steam must be running and user logged in).
 - **Dependencies**: .NET Framework 4.8, Costura.Fody (for single-file output).
 - **CI**: AppVeyor config in `.appveyor.yml` (uses Visual Studio 2019, restores NuGet, builds solution, caches packages).
 
