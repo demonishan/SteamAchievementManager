@@ -23,8 +23,8 @@ This isn't just a visual skin; it's a complete modernization of the experience:
 
 1. **Download** the latest release from the `Dist` folder.
 2. **Execute** `SLAM.exe`.
-3. Select a game from your library.
-4. Unlock (or lock!) achievements to your heart's content.
+3. **???**
+4. **Profit**
 
 _Note: Steam must be running and you must be logged in._
 
