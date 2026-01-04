@@ -11,10 +11,9 @@
 - **Suppressions**: `SAM.API/GlobalSuppressions.cs` disables many code analysis warnings due to necessary unsafe/interop patterns.
 - **Resource Management**: Embedded resources (icons, images) are linked in `.csproj` and loaded at runtime.
 - **Fody/Costura**: Used for IL weaving and embedding dependencies (see `FodyWeavers.xml`).
-- **Build Output**: Main executable is `SLAM.exe` in `SAM.Reborn/bin/Release/net48/` and is copied to `Dist/` after build.
 
 ## Developer Workflows
-- **Build**: Always run a build to test for any error. Use the VS Code task "Build and Copy EXE to Dist" or run:
+- **Build**: Always run a build to test for any error:
   ```powershell
   dotnet build -c Release
   ```
@@ -46,7 +45,6 @@
 - `SAM.API/GlobalSuppressions.cs`: Code analysis suppressions for interop.
 - `SAM.Reborn/MainWindow.xaml`: Main WPF UI.
 - `SAM.Reborn/SAM.Picker.csproj`: GUI project file, resource linking.
-- `Dist/`: Final output location for `SLAM.exe`.
 - `.appveyor.yml`: CI build config.
 - `INFO.md`: Do NOT read this file.
 
