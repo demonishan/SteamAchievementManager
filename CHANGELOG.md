@@ -1,4 +1,4 @@
-## Version History
+## Change Log
 
 ### 8.6.11 (2026-01-07)
 - Added "Smart Random" button for achievements randomization in timer mode.
