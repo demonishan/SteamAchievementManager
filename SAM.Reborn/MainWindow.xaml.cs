@@ -954,6 +954,28 @@ namespace SAM.Picker.Modern {
         if (RandomTimerPopup != null) RandomTimerPopup.IsOpen = false;
       } else DisplayAlert("Please enter valid numeric values for Min and Max minutes.", true);
     }
+    private void SmartRandom_Click(object sender, RoutedEventArgs e) {
+      if (int.TryParse(RandMinInput.Text, out int min) && int.TryParse(RandMaxInput.Text, out int max)) {
+        if (min > max) {
+          int temp = min;
+          min = max;
+          max = temp;
+        }
+        var random = new Random();
+        var pending = _Achievements.Where(a => !a.IsAchieved).ToList();
+        int count = pending.Count;
+        int spread = max - min;
+        int jitterLimit = Math.Max(1, (int)(spread * 0.15));
+        for (int i = 0; i < count; i++) {
+          double progress = (double)i / (count > 1 ? count - 1 : 1);
+          int target = (int)(min + spread * progress);
+          int jitter = random.Next(-jitterLimit, jitterLimit + 1);
+          int val = Math.Max(min, Math.Min(max, target + jitter));
+          pending[i].TimerMinutes = val.ToString();
+        }
+        if (RandomTimerPopup != null) RandomTimerPopup.IsOpen = false;
+      } else DisplayAlert("Please enter valid numeric values for Min and Max minutes.", true);
+    }
     private bool _IsTimerActive = false;
     private bool _IsTimerPaused = false;
     private void UpdateTimerButtonState() {

@@ -1,5 +1,10 @@
 ## Version History
 
+### 8.6.11 (2026-01-07)
+- Added "Smart Random" button for achievements randomization in timer mode.
+  - Dynamically calculates jitter based on the input range.
+  - Ensures values are naturally distributed across the achievement list (top -> min, bottom -> max).
+
 ### 8.6.10 (2026-01-05)
 - Favorites System.
   - Added interactive Star icon on game cards (hover to see, click to toggle).

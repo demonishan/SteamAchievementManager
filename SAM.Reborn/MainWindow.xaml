@@ -287,9 +287,9 @@
           </Border>
           <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
             <ToggleButton x:Name="FilterGamesBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleLeft}" Click="GameFilterToggle_Click" IsChecked="True" Content="Games"/>
-            <ToggleButton x:Name="FilterDlcBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="GameFilterToggle_Click" IsChecked="False" Content="DLC"/>
+            <ToggleButton x:Name="FilterDlcBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="GameFilterToggle_Click" IsChecked="False" Content="DLC"/>
             <ToggleButton x:Name="FilterModsBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="GameFilterToggle_Click" IsChecked="False" Content="Mods"/>
-            <ToggleButton x:Name="FilterDemosBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="GameFilterToggle_Click" IsChecked="False" Content="Demos"/>
+            <ToggleButton x:Name="FilterDemosBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="GameFilterToggle_Click" IsChecked="False" Content="Demos"/>
             <ToggleButton x:Name="FilterFavoritesBtn" Height="40" Width="40" Margin="10,0,0,0" Style="{StaticResource ToggleActionButtonStyle}" Click="FavoritesFilterToggle_Click" IsChecked="False" ToolTip="Favorites Only">
               <Path Data="{StaticResource Icon.Star}" Style="{StaticResource PathIconStyle}"/>
             </ToggleButton>
@@ -533,7 +533,8 @@
                       <TextBox x:Name="RandMaxInput" Background="#20232a" Foreground="White" BorderThickness="0" Padding="5" Text="60" HorizontalContentAlignment="Center"/>
                     </StackPanel>
                   </Grid>
-                  <Button Content="Apply" Margin="0,15,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="ApplyRandomTimer_Click" Height="30"/>
+                  <Button Content="Totally Random" Margin="0,15,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="ApplyRandomTimer_Click" Height="30"/>
+                  <Button Content="Smart Random" Margin="0,5,0,0" Style="{StaticResource PrimaryActionButtonStyle}" Click="SmartRandom_Click" Height="30"/>
                 </StackPanel>
               </Border>
             </Popup>

@@ -166,6 +166,7 @@ BenchmarkDotNet.Artifacts/
 bld/
 BundleArtifacts/
 ClientBin/
+config.json
 coverage*.info
 coverage*.json
 coverage*.xml
