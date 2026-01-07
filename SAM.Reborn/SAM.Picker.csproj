@@ -15,6 +15,7 @@
     <Resource Include="..\Resources\icon-installed.png" Link="Resources\icon-installed.png" />
     <Resource Include="..\Resources\icon-achievement.png" Link="Resources\icon-achievement.png" />
     <Resource Include="..\Resources\icon-no-achievement.png" Link="Resources\icon-no-achievement.png" />
+    <Resource Include="..\Resources\reload.png" Link="Resources\reload.png" />
   </ItemGroup>
   <PropertyGroup>
     <ApplicationIcon>..\Resources\icon.ico</ApplicationIcon>

@@ -66,13 +66,10 @@
       <Setter Property="Stretch" Value="Uniform"/>
     </Style>
     <Geometry x:Key="Icon.Search">M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z</Geometry>
-    <Geometry x:Key="Icon.Refresh">M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z</Geometry>
     <Geometry x:Key="Icon.Save">M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z</Geometry>
     <Geometry x:Key="Icon.Back">M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z</Geometry>
     <Geometry x:Key="Icon.SortAz">M19,17H22L18,21L14,17H17V3H19V17M11,3V5H3V3H11M9,7V9H3V7H9M7,11V13H3V11H7M5,15V17H3V15H5M3,19V21H3V19H3Z</Geometry>
     <Geometry x:Key="Icon.Filter">M10,18H14V16H10V18M3,6V8H21V6H3M6,13H18V11H6V13Z</Geometry>
-    <Geometry x:Key="Icon.Trophy">M20.2,2H17V1H7V2H3.8C2.2,2 1,3.2 1,4.8V6.2C1,7.5 2,8.6 3.2,8.9C4.1,11.6 6.5,13.6 9.5,13.9V16H7V18H17V16H14.5V13.9C17.5,13.6 19.9,11.6 20.8,8.9C22,8.6 23,7.5 23,6.2V4.8C23,3.2 21.8,2 20.2,2M3,6.2V4.8C3,4.3 3.3,4 3.8,4H7V8.8C4.9,8.4 3.3,7.5 3,6.2M21,6.2C20.7,7.5 19.1,8.4 17,8.8V4H20.2C20.7,4 21,4.3 21,4.8V6.2Z</Geometry>
-    <Geometry x:Key="Icon.Block">M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z</Geometry>
     <Geometry x:Key="Icon.DragHandle">M9,6h2v2h-2v-2z m0,5h2v2h-2v-2z m0,5h2v2h-2v-2z m5,-10h2v2h-2v-2z m0,5h2v2h-2v-2z m0,5h2v2h-2v-2z</Geometry>
     <Geometry x:Key="Icon.Timer">M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z</Geometry>
     <Geometry x:Key="Icon.Play">M8,5.14V19.14L19,12.14L8,5.14Z</Geometry>
@@ -84,10 +81,8 @@
     <Geometry x:Key="Icon.Shield">M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z</Geometry>
     <Geometry x:Key="Icon.Lock">M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8H17V6A5,5 0 0,0 12,1A5,5 0 0,0 7,6V8H6A2,2 0 0,0 4,10V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V10A2,2 0 0,0 18,8M12,3A3,3 0 0,1 15,6V8H9V6A3,3 0 0,1 12,3Z</Geometry>
     <Geometry x:Key="Icon.Unlock">M18,8H17V6A5,5 0 0,0 12,1A5,5 0 0,0 7,6H9C9,4.34 10.34,3 12,3A3,3 0 0,1 15,6V8H6A2,2 0 0,0 4,10V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V10A2,2 0 0,0 18,8M12,17A2,2 0 0,1 10,15A2,2 0 0,1 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17Z</Geometry>
+    <Geometry x:Key="Icon.Upgrade">M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z</Geometry>
     <Geometry x:Key="Icon.Broken">M3,3H21V10L18,13L15,10L12,13L9,10L6,13L3,10V3M3,21H21V14L18,17L15,14L12,17L9,14L6,17L3,14V21Z</Geometry>
-    <Geometry x:Key="Icon.Installed">M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M10,17L5,12L6.41,10.59L10,14.17L17.59,6.58L19,8L10,17Z</Geometry>
-    <Geometry x:Key="Icon.Download">M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z</Geometry>
-    <Geometry x:Key="Icon.Star">M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z</Geometry>
     <Geometry x:Key="Icon.All">M4,4H8V8H4V4M10,4H14V8H10V4M16,4H20V8H16V4M4,10H8V14H4V10M10,10H14V14H10V10M16,10H20V14H16V10M4,16H8V20H4V16M10,16H14V20H10V16M16,16H20V20H16V16Z</Geometry>
     <Style x:Key="ToggleActionButtonStyle" TargetType="ToggleButton">
       <Setter Property="Background" Value="#20232a"/>
@@ -295,10 +290,10 @@
             <ToggleButton x:Name="FilterFavoritesBtn" Height="40" Width="40" Margin="10,0,0,0" Style="{StaticResource ToggleActionButtonStyleLeft}" Click="FavoritesFilterToggle_Click" IsChecked="False" ToolTip="Favorites">
               <Image Source="pack://application:,,,/SLAM;component/Resources/icon-not-favorite.png" Width="18" Height="18" Stretch="Uniform"/>
             </ToggleButton>
-            <ToggleButton x:Name="FilterInstalledBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="InstalledFilterToggle_Click" IsChecked="False" ToolTip="Locally Installed">
+            <ToggleButton x:Name="FilterInstalledBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="InstalledFilterToggle_Click" IsChecked="True" ToolTip="Locally Installed">
               <Image Source="pack://application:,,,/SLAM;component/Resources/icon-installed.png" Width="18" Height="18" Stretch="Uniform"/>
             </ToggleButton>
-            <ToggleButton x:Name="FilterWithAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="AchievementFilterToggle_Click" IsChecked="True" ToolTip="With Achievements">
+            <ToggleButton x:Name="FilterWithAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="AchievementFilterToggle_Click" IsChecked="False" ToolTip="With Achievements">
               <Image Source="pack://application:,,,/SLAM;component/Resources/icon-achievement.png" Width="18" Height="18" Stretch="Uniform"/>
             </ToggleButton>
             <ToggleButton x:Name="FilterWithoutAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="AchievementFilterToggle_Click" IsChecked="False" ToolTip="Without Achievements">
@@ -306,7 +301,7 @@
             </ToggleButton>
           </StackPanel>
           <Button Grid.Column="2" Width="40" Height="40" Margin="10,0,0,0" Click="Refresh_Click" Style="{StaticResource ActionButtonStyle}">
-            <Path Data="{StaticResource Icon.Refresh}" Style="{StaticResource PathIconStyle}"/>
+            <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="18" Height="18" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
           </Button>
         </Grid>
         <ListView x:Name="GamesList" Grid.Row="1" Margin="18,0,18,10" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -358,7 +353,7 @@
                     <Image Source="{Binding Image}" Stretch="UniformToFill"/>
                   </Border>
                   <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0">
-                    <Grid Margin="0,0,0,0" Width="20" Height="20" ToolTip="Installed">
+                    <Grid Margin="0,0,0,0" Width="20" Height="20" ToolTip="Locally Installed">
                       <Grid.Style>
                         <Style TargetType="Grid">
                           <Setter Property="Visibility" Value="Collapsed"/>
@@ -410,11 +405,11 @@
         </ListView>
         <Grid x:Name="HomeLoadingOverlay" Grid.Row="1" Background="#B21E1E1E" Visibility="Visible">
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Path Data="{StaticResource Icon.Refresh}" Width="32" Height="32" Fill="White" RenderTransformOrigin="0.5,0.5">
-              <Path.RenderTransform>
+            <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="32" Height="32" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+              <Image.RenderTransform>
                 <RotateTransform x:Name="HomeRotate" Angle="0"/>
-              </Path.RenderTransform>
-              <Path.Triggers>
+              </Image.RenderTransform>
+              <Image.Triggers>
                 <EventTrigger RoutedEvent="Loaded">
                   <BeginStoryboard>
                     <Storyboard>
@@ -422,8 +417,8 @@
                     </Storyboard>
                   </BeginStoryboard>
                 </EventTrigger>
-              </Path.Triggers>
-            </Path>
+              </Image.Triggers>
+            </Image>
             <TextBlock Text="Loading Library..." Margin="0,15,0,0" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
           </StackPanel>
         </Grid>
@@ -505,7 +500,7 @@
               </Button.ContextMenu>
             </Button>
             <Button x:Name="RefreshButton" Width="40" Height="40" Margin="5,0" Click="RefreshGame_Click" Style="{StaticResource ActionButtonStyle}">
-              <Path Data="{StaticResource Icon.Refresh}" Style="{StaticResource PathIconStyle}"/>
+              <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="16" Height="16" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
             </Button>
             <Button x:Name="ToggleSearchButton" Width="40" Height="40" Margin="5,0" Click="ToggleSearch_Click" Style="{StaticResource ActionButtonStyle}" ToolTip="Toggle Search">
               <Path Data="{StaticResource Icon.Search}" Style="{StaticResource PathIconStyle}"/>
@@ -857,11 +852,11 @@
           </Grid>
           <Grid x:Name="LoadingOverlay" Background="#B21E1E1E" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-              <Path Data="{StaticResource Icon.Refresh}" Width="32" Height="32" Fill="White" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
+              <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="32" Height="32" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+                <Image.RenderTransform>
                   <RotateTransform x:Name="Rotate" Angle="0"/>
-                </Path.RenderTransform>
-                <Path.Triggers>
+                </Image.RenderTransform>
+                <Image.Triggers>
                   <EventTrigger RoutedEvent="Loaded">
                     <BeginStoryboard>
                       <Storyboard>
@@ -869,8 +864,8 @@
                       </Storyboard>
                     </BeginStoryboard>
                   </EventTrigger>
-                </Path.Triggers>
-              </Path>
+                </Image.Triggers>
+              </Image>
               <TextBlock Text="Loading achievements..." Margin="0,15,0,0" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
             </StackPanel>
           </Grid>

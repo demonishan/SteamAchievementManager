@@ -134,7 +134,7 @@ namespace SAM.Picker.Modern {
     private bool _WantDemos = false;
     private bool _WantDlc = false;
     private enum GameFilterMode { Favorites, Installed, WithAchievements, WithoutAchievements }
-    private GameFilterMode _CurrentFilterMode = GameFilterMode.WithAchievements;
+    private GameFilterMode _CurrentFilterMode = GameFilterMode.Installed;
     private void SetFilterMode(GameFilterMode mode) {
       if (_CurrentFilterMode == mode) return;
       _CurrentFilterMode = mode;
