@@ -266,8 +266,13 @@ namespace SAM.API {
       private delegate bool NativeIsSubscribedApp(IntPtr self, uint gameId);
       [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
       private delegate IntPtr NativeGetCurrentGameLanguage(IntPtr self);
+      [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+      [return: MarshalAs(UnmanagedType.I1)]
+      private delegate bool NativeIsAppInstalled(IntPtr self, uint gameId);
+
       public bool IsSubscribedApp(uint gameId) => Call<bool, NativeIsSubscribedApp>(Functions.IsSubscribedApp, ObjectAddress, gameId);
       public string GetCurrentGameLanguage() => NativeStrings.PointerToString(Call<IntPtr, NativeGetCurrentGameLanguage>(Functions.GetCurrentGameLanguage, ObjectAddress));
+      public bool IsAppInstalled(uint gameId) => Call<bool, NativeIsAppInstalled>(Functions.IsAppInstalled, ObjectAddress, gameId);
     }
     public class SteamClient018 : NativeWrapper<ISteamClient018> {
       [UnmanagedFunctionPointer(CallingConvention.ThisCall)]

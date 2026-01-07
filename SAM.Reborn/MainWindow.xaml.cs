@@ -107,11 +107,13 @@ namespace SAM.Picker.Modern {
       SaveConfiguration();
       var vm = _FilteredGames.FirstOrDefault(x => x.Id == appId);
       if (vm != null) vm.IsFavorite = _FavoriteGameIds.Contains(appId);
-      if (_WantFavorites) RefreshFilter();
+      if (_CurrentFilterMode == GameFilterMode.Favorites) RefreshFilter();
     }
     private void FavoritesFilterToggle_Click(object sender, RoutedEventArgs e) {
-      _WantFavorites = (sender as System.Windows.Controls.Primitives.ToggleButton).IsChecked == true;
-      RefreshFilter();
+      SetFilterMode(GameFilterMode.Favorites);
+    }
+    private void InstalledFilterToggle_Click(object sender, RoutedEventArgs e) {
+      SetFilterMode(GameFilterMode.Installed);
     }
     private void ToggleFavorite_Click(object sender, RoutedEventArgs e) {
       if (sender is MenuItem item && item.DataContext is GameViewModel game) {
@@ -131,9 +133,17 @@ namespace SAM.Picker.Modern {
     private bool _WantMods = false;
     private bool _WantDemos = false;
     private bool _WantDlc = false;
-    private bool _WantFavorites = false;
-    private bool _WantWithAchievements = true;
-    private bool _WantWithoutAchievements = false;
+    private enum GameFilterMode { Favorites, Installed, WithAchievements, WithoutAchievements }
+    private GameFilterMode _CurrentFilterMode = GameFilterMode.WithAchievements;
+    private void SetFilterMode(GameFilterMode mode) {
+      if (_CurrentFilterMode == mode) return;
+      _CurrentFilterMode = mode;
+      if (FilterFavoritesBtn != null) FilterFavoritesBtn.IsChecked = mode == GameFilterMode.Favorites;
+      if (FilterInstalledBtn != null) FilterInstalledBtn.IsChecked = mode == GameFilterMode.Installed;
+      if (FilterWithAchievementsBtn != null) FilterWithAchievementsBtn.IsChecked = mode == GameFilterMode.WithAchievements;
+      if (FilterWithoutAchievementsBtn != null) FilterWithoutAchievementsBtn.IsChecked = mode == GameFilterMode.WithoutAchievements;
+      RefreshFilter();
+    }
     private DispatcherTimer _CallbackTimer;
     private ICollectionView _AchievementView;
     private string _AppVersion = "";
@@ -223,7 +233,10 @@ namespace SAM.Picker.Modern {
         var fetchedGames = new List<GameInfo>();
         foreach (var game in allKnownGames) {
           try {
-            if (_SteamClient.SteamApps008.IsSubscribedApp(game.Id)) fetchedGames.Add(game);
+            if (_SteamClient.SteamApps008.IsSubscribedApp(game.Id)) {
+               game.IsInstalled = _SteamClient.SteamApps008.IsAppInstalled(game.Id);
+               fetchedGames.Add(game);
+            }
           } catch { }
         }
         Dispatcher.Invoke(() => {
@@ -271,7 +284,7 @@ namespace SAM.Picker.Modern {
           }
         } catch { }
       }
-      await Task.Delay(25);
+      // await Task.Delay(10);
       if (bitmap != null) {
         await Dispatcher.InvokeAsync(() => {
           try {
@@ -295,13 +308,26 @@ namespace SAM.Picker.Modern {
       if (SearchBox == null) return;
       var searchText = SearchBox.Text.ToLower(CultureInfo.InvariantCulture);
       if (ClearSearchBtn != null) ClearSearchBtn.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Collapsed : Visibility.Visible;
-      var filtered = _AllGames.Where(g => (string.IsNullOrEmpty(searchText) || g.Name.ToLower(CultureInfo.InvariantCulture).Contains(searchText)) && ((g.Type == "normal" && _WantGames) || (g.Type == "mod" && _WantMods) || (g.Type == "demo" && _WantDemos) || (g.Type == "dlc" && _WantDlc)) && ((g.HasAchievements && _WantWithAchievements) || (!g.HasAchievements && _WantWithoutAchievements))).OrderBy(g => g.Name).ToList();
-      if (_WantFavorites) {
-        filtered = filtered.Where(g => _FavoriteGameIds.Contains(g.Id)).ToList();
+      var filtered = _AllGames.Where(g => (string.IsNullOrEmpty(searchText) || g.Name.ToLower(CultureInfo.InvariantCulture).Contains(searchText)) && ((g.Type == "normal" && _WantGames) || (g.Type == "mod" && _WantMods) || (g.Type == "demo" && _WantDemos) || (g.Type == "dlc" && _WantDlc))).OrderBy(g => g.Name).ToList();
+
+      switch (_CurrentFilterMode) {
+        case GameFilterMode.Favorites:
+          filtered = filtered.Where(g => _FavoriteGameIds.Contains(g.Id)).ToList();
+          break;
+        case GameFilterMode.Installed:
+          filtered = filtered.Where(g => g.IsInstalled).ToList();
+          break;
+        case GameFilterMode.WithAchievements:
+          filtered = filtered.Where(g => g.HasAchievements).ToList();
+          break;
+        case GameFilterMode.WithoutAchievements:
+          filtered = filtered.Where(g => !g.HasAchievements).ToList();
+          break;
       }
+
       _FilteredGames.Clear();
       foreach (var g in filtered)
-        _FilteredGames.Add(new GameViewModel { Id = g.Id, Name = g.Name, Image = g.CachedIcon, IsFavorite = _FavoriteGameIds.Contains(g.Id) });
+        _FilteredGames.Add(new GameViewModel { Id = g.Id, Name = g.Name, Image = g.CachedIcon, IsFavorite = _FavoriteGameIds.Contains(g.Id), IsInstalled = g.IsInstalled });
     }
     private ObservableCollection<AchievementViewModel> _Achievements = new ObservableCollection<AchievementViewModel>();
     private uint _SelectedGameId;
@@ -869,20 +895,8 @@ namespace SAM.Picker.Modern {
       }
     }
     private void AchievementFilterToggle_Click(object sender, RoutedEventArgs e) {
-      if (sender is System.Windows.Controls.Primitives.ToggleButton btn) {
-        if (btn.IsChecked == false) {
-          btn.IsChecked = true;
-          return;
-        }
-        if (btn == FilterWithAchievementsBtn) {
-          if (FilterWithoutAchievementsBtn != null) FilterWithoutAchievementsBtn.IsChecked = false;
-        } else if (btn == FilterWithoutAchievementsBtn) {
-          if (FilterWithAchievementsBtn != null) FilterWithAchievementsBtn.IsChecked = false;
-        }
-        _WantWithAchievements = FilterWithAchievementsBtn.IsChecked == true;
-        _WantWithoutAchievements = FilterWithoutAchievementsBtn.IsChecked == true;
-        RefreshFilter();
-      }
+      if (sender == FilterWithAchievementsBtn) SetFilterMode(GameFilterMode.WithAchievements);
+      else if (sender == FilterWithoutAchievementsBtn) SetFilterMode(GameFilterMode.WithoutAchievements);
     }
     public static readonly DependencyProperty IsTimerModeProperty = DependencyProperty.Register("IsTimerMode", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
     public bool IsTimerMode {
@@ -1158,10 +1172,12 @@ namespace SAM.Picker.Modern {
     public string ImageUrl { get; set; }
     public System.Windows.Media.ImageSource CachedIcon { get; set; }
     public bool HasAchievements { get; set; }
+    public bool IsInstalled { get; set; }
   }
   public class GameViewModel : INotifyPropertyChanged {
     public uint Id { get; set; }
     public string Name { get; set; }
+    public bool IsInstalled { get; set; }
     private bool _IsFavorite;
     public bool IsFavorite {
       get => _IsFavorite;

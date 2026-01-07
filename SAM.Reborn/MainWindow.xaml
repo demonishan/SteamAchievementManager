@@ -85,6 +85,8 @@
     <Geometry x:Key="Icon.Lock">M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8H17V6A5,5 0 0,0 12,1A5,5 0 0,0 7,6V8H6A2,2 0 0,0 4,10V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V10A2,2 0 0,0 18,8M12,3A3,3 0 0,1 15,6V8H9V6A3,3 0 0,1 12,3Z</Geometry>
     <Geometry x:Key="Icon.Unlock">M18,8H17V6A5,5 0 0,0 12,1A5,5 0 0,0 7,6H9C9,4.34 10.34,3 12,3A3,3 0 0,1 15,6V8H6A2,2 0 0,0 4,10V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V10A2,2 0 0,0 18,8M12,17A2,2 0 0,1 10,15A2,2 0 0,1 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17Z</Geometry>
     <Geometry x:Key="Icon.Broken">M3,3H21V10L18,13L15,10L12,13L9,10L6,13L3,10V3M3,21H21V14L18,17L15,14L12,17L9,14L6,17L3,14V21Z</Geometry>
+    <Geometry x:Key="Icon.Installed">M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M10,17L5,12L6.41,10.59L10,14.17L17.59,6.58L19,8L10,17Z</Geometry>
+    <Geometry x:Key="Icon.Download">M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z</Geometry>
     <Geometry x:Key="Icon.Star">M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z</Geometry>
     <Geometry x:Key="Icon.All">M4,4H8V8H4V4M10,4H14V8H10V4M16,4H20V8H16V4M4,10H8V14H4V10M10,10H14V14H10V10M16,10H20V14H16V10M4,16H8V20H4V16M10,16H14V20H10V16M16,16H20V20H16V16Z</Geometry>
     <Style x:Key="ToggleActionButtonStyle" TargetType="ToggleButton">
@@ -290,17 +292,18 @@
             <ToggleButton x:Name="FilterDlcBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="GameFilterToggle_Click" IsChecked="False" Content="DLC"/>
             <ToggleButton x:Name="FilterModsBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="GameFilterToggle_Click" IsChecked="False" Content="Mods"/>
             <ToggleButton x:Name="FilterDemosBtn" Height="40" MinWidth="60" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="GameFilterToggle_Click" IsChecked="False" Content="Demos"/>
-            <ToggleButton x:Name="FilterFavoritesBtn" Height="40" Width="40" Margin="10,0,0,0" Style="{StaticResource ToggleActionButtonStyle}" Click="FavoritesFilterToggle_Click" IsChecked="False" ToolTip="Favorites Only">
-              <Path Data="{StaticResource Icon.Star}" Style="{StaticResource PathIconStyle}"/>
+            <ToggleButton x:Name="FilterFavoritesBtn" Height="40" Width="40" Margin="10,0,0,0" Style="{StaticResource ToggleActionButtonStyleLeft}" Click="FavoritesFilterToggle_Click" IsChecked="False" ToolTip="Favorites">
+              <Image Source="pack://application:,,,/SLAM;component/Resources/icon-not-favorite.png" Width="18" Height="18" Stretch="Uniform"/>
             </ToggleButton>
-            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-              <ToggleButton x:Name="FilterWithAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleLeft}" Click="AchievementFilterToggle_Click" IsChecked="True" ToolTip="With Achievements">
-                <Path Data="{StaticResource Icon.Trophy}" Style="{StaticResource PathIconStyle}"/>
-              </ToggleButton>
-              <ToggleButton x:Name="FilterWithoutAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="AchievementFilterToggle_Click" IsChecked="False" ToolTip="Without Achievements">
-                <Path Data="{StaticResource Icon.Block}" Style="{StaticResource PathIconStyle}"/>
-              </ToggleButton>
-            </StackPanel>
+            <ToggleButton x:Name="FilterInstalledBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="InstalledFilterToggle_Click" IsChecked="False" ToolTip="Locally Installed">
+              <Image Source="pack://application:,,,/SLAM;component/Resources/icon-installed.png" Width="18" Height="18" Stretch="Uniform"/>
+            </ToggleButton>
+            <ToggleButton x:Name="FilterWithAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleCenter}" Click="AchievementFilterToggle_Click" IsChecked="True" ToolTip="With Achievements">
+              <Image Source="pack://application:,,,/SLAM;component/Resources/icon-achievement.png" Width="18" Height="18" Stretch="Uniform"/>
+            </ToggleButton>
+            <ToggleButton x:Name="FilterWithoutAchievementsBtn" Height="40" Width="40" Margin="0" Style="{StaticResource ToggleActionButtonStyleRight}" Click="AchievementFilterToggle_Click" IsChecked="False" ToolTip="Without Achievements">
+              <Image Source="pack://application:,,,/SLAM;component/Resources/icon-no-achievement.png" Width="18" Height="18" Stretch="Uniform"/>
+            </ToggleButton>
           </StackPanel>
           <Button Grid.Column="2" Width="40" Height="40" Margin="10,0,0,0" Click="Refresh_Click" Style="{StaticResource ActionButtonStyle}">
             <Path Data="{StaticResource Icon.Refresh}" Style="{StaticResource PathIconStyle}"/>
@@ -354,43 +357,49 @@
                   <Border Grid.Row="0" ClipToBounds="True" Width="260" Height="121" Background="Black">
                     <Image Source="{Binding Image}" Stretch="UniformToFill"/>
                   </Border>
-                  <ToggleButton Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" IsChecked="{Binding IsFavorite, Mode=OneWay}" Click="ToggleFavorite_Btn_Click" Width="20" Height="20" Cursor="Hand">
-                    <ToggleButton.Style>
-                      <Style TargetType="ToggleButton">
-                        <Setter Property="Template">
-                          <Setter.Value>
-                            <ControlTemplate TargetType="ToggleButton">
-                              <Grid Background="Transparent">
-                                <Path x:Name="Star" Data="{StaticResource Icon.Star}" Stretch="Uniform" Width="16" Height="16" Stroke="#888888" StrokeThickness="1.5" Fill="Transparent">
-                                  <Path.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="2" Color="Black" Opacity="0.8"/>
-                                  </Path.Effect>
-                                </Path>
-                              </Grid>
-                              <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                  <Setter TargetName="Star" Property="Stroke" Value="#FFD700"/>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                  <Setter TargetName="Star" Property="Fill" Value="#FFD700"/>
-                                  <Setter TargetName="Star" Property="Stroke" Value="#FFD700"/>
-                                </Trigger>
-                              </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                          </Setter.Value>
-                        </Setter>
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                          </DataTrigger>
-                          <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </ToggleButton.Style>
-                  </ToggleButton>
+                  <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0">
+                    <Grid Margin="0,0,0,0" Width="20" Height="20" ToolTip="Installed">
+                      <Grid.Style>
+                        <Style TargetType="Grid">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Grid.Style>
+                      <Image Source="pack://application:,,,/SLAM;component/Resources/icon-installed.png" Width="16" Height="16" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Effect>
+                          <DropShadowEffect ShadowDepth="0" BlurRadius="2" Color="Black" Opacity="0.8"/>
+                        </Image.Effect>
+                      </Image>
+                    </Grid>
+                    <ToggleButton IsChecked="{Binding IsFavorite, Mode=OneWay}" Click="ToggleFavorite_Btn_Click" Width="20" Height="20" Cursor="Hand" ToolTip="Favorite">
+                      <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                          <Setter Property="Template">
+                            <Setter.Value>
+                              <ControlTemplate TargetType="ToggleButton">
+                                <Grid Background="Transparent">
+                                  <Image x:Name="Star" Source="pack://application:,,,/SLAM;component/Resources/icon-not-favorite.png" Width="16" Height="16" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality">
+                                    <Image.Effect>
+                                      <DropShadowEffect ShadowDepth="0" BlurRadius="2" Color="Black" Opacity="0.8"/>
+                                    </Image.Effect>
+                                  </Image>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                  <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Star" Property="Source" Value="pack://application:,,,/SLAM;component/Resources/icon-favorite.png"/>
+                                  </Trigger>
+                                </ControlTemplate.Triggers>
+                              </ControlTemplate>
+                            </Setter.Value>
+                          </Setter>
+                        </Style>
+                      </ToggleButton.Style>
+                    </ToggleButton>
+                  </StackPanel>
                   <Border Grid.Row="1" Background="#20232a" Height="50">
                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" Foreground="White" TextTrimming="None"/>
                   </Border>
@@ -425,7 +434,6 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Background image for game details -->
         <Image x:Name="GameBackgroundImage" Grid.RowSpan="3" Stretch="UniformToFill" Opacity="1" Visibility="Collapsed" Panel.ZIndex="0"/>
         <Grid Grid.Row="0" Margin="20,10,20,10">
           <Grid.RowDefinitions>

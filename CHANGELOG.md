@@ -1,5 +1,16 @@
 ## Change Log
 
+### 8.6.12 (2026-01-07)
+- UI: Game Cards refresh.
+  - Merged status icons (Installed, Favorite) into a unified indicator area.
+  - Added visual "Installed" indicator (Green Download Icon) to game cards.
+  - Added "Not Favorite" icon state for better discoverability.
+  - High-quality rendering for small icons to prevent blurriness.
+- UI: Filter Bar refresh.
+  - Merged separate filter groups into a single segmented control strip.
+  - Updated all filter icons for consistent style.
+  - Enforced mutually exclusive filtering (install vs favorites vs achievements).
+
 ### 8.6.11 (2026-01-07)
 - Added "Smart Random" button for achievements randomization in timer mode.
   - Dynamically calculates jitter based on the input range.
