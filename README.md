@@ -1,5 +1,11 @@
 # Super Lazy Achievement Manager (SLAM)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/demonishan/SuperLazyAchievementManager)](https://github.com/demonishan/SuperLazyAchievementManager/releases)
+[![GitHub all releases](https://img.shields.io/github/downloads/demonishan/SuperLazyAchievementManager/total)](https://github.com/demonishan/SuperLazyAchievementManager/releases)
+[![GitHub issues](https://img.shields.io/github/issues/demonishan/SuperLazyAchievementManager)](https://github.com/demonishan/SuperLazyAchievementManager/issues)
+[![GitHub stars](https://img.shields.io/github/stars/demonishan/SuperLazyAchievementManager?style=social)](https://github.com/demonishan/SuperLazyAchievementManager/stargazers)
+
 ![Poster](Resources/poster.png)
 
 ## About the Project
