@@ -22,40 +22,6 @@ namespace SLAM.Reborn {
   public class AppConfig {
     public List<uint> FavoriteGames { get; set; } = new List<uint>();
   }
-  public static class ImageCacheHelper {
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, BitmapImage> _memoryCache = new System.Collections.Concurrent.ConcurrentDictionary<string, BitmapImage>();
-    public static async Task<BitmapImage> GetImageAsync(string url, string cachePath) {
-      if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(cachePath)) return null;
-      if (_memoryCache.TryGetValue(cachePath, out var cachedImage)) return cachedImage;
-      var dir = System.IO.Path.GetDirectoryName(cachePath);
-      if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
-      if (!System.IO.File.Exists(cachePath) || new System.IO.FileInfo(cachePath).Length == 0) {
-        try {
-          using (var client = new System.Net.WebClient()) {
-            var data = await client.DownloadDataTaskAsync(url);
-            if (data.Length > 0) System.IO.File.WriteAllBytes(cachePath, data);
-          }
-        }
-        catch { }
-      }
-      if (System.IO.File.Exists(cachePath) && new System.IO.FileInfo(cachePath).Length > 0) {
-        try {
-          BitmapImage bitmap = null;
-          await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => {
-            bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(cachePath, UriKind.Absolute);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-          });
-          _memoryCache[cachePath] = bitmap;
-          return bitmap;
-        }
-        catch { }
-      }
-      return null;
-    }
-  }
   public partial class MainWindow : Window {
     private void CopyGameName_ContextMenu_Click(object sender, RoutedEventArgs e) {
       if (SelectedGameName != null && !string.IsNullOrWhiteSpace(SelectedGameName.Text))
@@ -326,7 +292,6 @@ namespace SLAM.Reborn {
           filtered = filtered.Where(g => !g.HasAchievements).ToList();
           break;
       }
-
       _FilteredGames.Clear();
       foreach (var g in filtered)
         _FilteredGames.Add(new GameViewModel { Id = g.Id, Name = g.Name, Type = g.Type, Image = g.CachedIcon, IsFavorite = _FavoriteGameIds.Contains(g.Id), IsInstalled = g.IsInstalled });
@@ -519,7 +484,6 @@ namespace SLAM.Reborn {
           return;
         }
         _CallbackTimer.Start();
-
         var gameInfo = _AllGames.FirstOrDefault(g => g.Id == _SelectedGameId);
         if (gameInfo != null && !gameInfo.HasAchievements) {
           if (NoAchievementsMessage != null) NoAchievementsMessage.Visibility = Visibility.Visible;
@@ -534,7 +498,6 @@ namespace SLAM.Reborn {
           SharedStatusText.Text = "No achievements here. You're just here for the card drops, aren't you? I won't tell.";
           return;
         }
-
         var steamId = _SteamClient.SteamUser.GetSteamId();
         _SteamClient.SteamUserStats.RequestUserStats(steamId);
         _SteamClient.SteamUserStats.RequestGlobalAchievementPercentages();
@@ -586,7 +549,6 @@ namespace SLAM.Reborn {
           _Achievements.Add(avm);
         }
       }
-
       if (_Achievements.Count == 0) {
         if (NoAchievementsMessage != null) NoAchievementsMessage.Visibility = Visibility.Visible;
         if (AchievementList != null) AchievementList.Visibility = Visibility.Collapsed;
@@ -594,7 +556,6 @@ namespace SLAM.Reborn {
         if (NoAchievementsMessage != null) NoAchievementsMessage.Visibility = Visibility.Collapsed;
         if (AchievementList != null) AchievementList.Visibility = Visibility.Visible;
       }
-
       bool hasHiddenLocked = _Achievements.Any(x => x.IsHiddenLocked);
       if (RevealHiddenBtn != null) RevealHiddenBtn.Visibility = hasHiddenLocked ? Visibility.Visible : Visibility.Collapsed;
       SharedStatusText.Text = $"Loaded {_Achievements.Count} achievements.";
@@ -603,13 +564,33 @@ namespace SLAM.Reborn {
       int locked = total - unlocked;
       if (AchievementProgressBar != null) AchievementProgressBar.Visibility = Visibility.Visible;
       UpdateProgressBar();
+      if (SelectedGamePlayTime != null) {
+        SelectedGamePlayTime.Visibility = Visibility.Collapsed;
+        SelectedGamePlayTime.Text = "";
+        try {
+          string installPath = SAM.API.Steam.GetInstallPath();
+          ulong steamId64 = _SteamClient.SteamUser.GetSteamId();
+          uint accountId = (uint)(steamId64 & 0xFFFFFFFF);
+          var stats = LocalConfigReader.GetAppStats(installPath, accountId, _SelectedGameId);
+          if (stats.PlayTimeMinutes > 0) {
+            double hours = stats.PlayTimeMinutes / 60.0;
+            string text = $"Played: {hours:0.0}h";
+            if (stats.LastPlayedTime > 0) {
+              DateTime lastPlayed = DateTimeOffset.FromUnixTimeSeconds(stats.LastPlayedTime).LocalDateTime;
+              string dateStr = lastPlayed.Date == DateTime.Today ? "Today" : (lastPlayed.Date == DateTime.Today.AddDays(-1) ? "Yesterday" : lastPlayed.ToString("d"));
+              text += $" | Last Played: {dateStr}";
+            }
+            SelectedGamePlayTime.Text = text;
+            SelectedGamePlayTime.Visibility = Visibility.Visible;
+          }
+        } catch { }
+      }
       if (anyProtected) {
         AreModificationsAllowed = false;
-        SharedStatusText.Text = "These achievements are protected! SLAM is lazy, not magical. Can't touch 'em.";
-        DisplayAlert(SharedStatusText.Text, true);
         UpdateProtectionState();
-      }
-      else {
+        UpdateStatsMessage();
+        DisplayAlert("These achievements are protected! SLAM is lazy, not magical. Can't touch 'em.", true);
+      } else {
         AreModificationsAllowed = true;
         UpdateProtectionState();
         UpdateStatsMessage();
@@ -824,10 +805,8 @@ namespace SLAM.Reborn {
         SLAM.Reborn.App.LogCrash(ex, "Back_Click");
       }
     }
-
     private async void SetGameBackgroundImage(uint appId) {
       if (GameBackgroundImage == null) return;
-      
       BitmapImage bitmap = null;
       try {
         string cacheDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache", "backgrounds");
@@ -844,11 +823,9 @@ namespace SLAM.Reborn {
           bitmap = await ImageCacheHelper.GetImageAsync(bgUrl, bgPath);
         }
       } catch { }
-
       if (bitmap == null) {
         bitmap = new BitmapImage(new Uri("pack://application:,,,/SLAM;component/Resources/bg.png"));
       }
-      
       GameBackgroundImage.Source = bitmap;
       GameBackgroundImage.Visibility = Visibility.Visible;
     }
@@ -904,7 +881,6 @@ namespace SLAM.Reborn {
           if (FilterModsBtn != null) FilterModsBtn.IsChecked = false;
           if (FilterDemosBtn != null) FilterDemosBtn.IsChecked = false;
         }
-
         _WantGames = FilterGamesBtn.IsChecked == true;
         _WantMods = FilterModsBtn.IsChecked == true;
         _WantDemos = FilterDemosBtn.IsChecked == true;
@@ -952,15 +928,13 @@ namespace SLAM.Reborn {
       int unlocked = _Achievements.Count(x => x.IsAchieved);
       int total = _Achievements.Count;
       int locked = total - unlocked;
-      if (!AreModificationsAllowed) {
-        SharedStatusText.Text = "These achievements are protected! SLAM is lazy, not magical. Can't touch 'em.";
-      } else {
+      if (!AreModificationsAllowed) SharedStatusText.Text = "These achievements are protected! SLAM is lazy, not magical. Can't touch 'em.";
+      else {
         if (unlocked == total && total > 0) SharedStatusText.Text = $"Unlocked all {total}. Please, touch some grass.";
         else if (unlocked == 0 && total > 0) SharedStatusText.Text = $"0 down, {total} to go. Do you even play this game?";
         else SharedStatusText.Text = $"{unlocked} out of {total} popped. Standing between me and my nap are the remaining {locked}.";
       }
     }
-
     private void EnableTimer_Click(object sender, RoutedEventArgs e) {
       IsTimerMode = !IsTimerMode;
       if (IsTimerMode) {

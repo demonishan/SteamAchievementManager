@@ -469,6 +469,7 @@
                 </ContextMenu>
               </TextBlock.ContextMenu>
             </TextBlock>
+            <TextBlock x:Name="SelectedGamePlayTime" FontSize="12" Foreground="#AAAAAA" Text="" Visibility="Collapsed"/>
           </StackPanel>
           <StackPanel Grid.Column="2" Orientation="Horizontal">
             <Button x:Name="LinksButton" Width="40" Height="40" Margin="5,0" Style="{StaticResource ActionButtonStyle}" Click="Links_Click" ToolTip="External Links">
