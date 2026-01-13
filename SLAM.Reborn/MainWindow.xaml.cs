@@ -111,6 +111,7 @@ namespace SLAM.Reborn {
       RefreshFilter();
     }
     private DispatcherTimer _CallbackTimer;
+    private DispatcherTimer _KeepAliveTimer;
     private ICollectionView _AchievementView;
     private string _AppVersion = "";
     private List<uint> _FavoriteGameIds = new List<uint>();
@@ -150,6 +151,16 @@ namespace SLAM.Reborn {
         catch (Exception ex) { SLAM.Reborn.App.LogCrash(ex, "CallbackTimer_RunCallbacks"); }
       };
       _CallbackTimer.Start();
+      _KeepAliveTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle);
+      _KeepAliveTimer.Interval = TimeSpan.FromMinutes(5);
+      _KeepAliveTimer.Tick += (s, e) => {
+        try {
+          if (_SteamClient != null) {
+            _SteamClient.SteamUserStats.StoreStats();
+            Dispatcher.Invoke(() => UpdatePlayTimeDisplay());
+          }
+        } catch { }
+      };
       AppDomain.CurrentDomain.UnhandledException += (s, e) => {
         if (e.ExceptionObject is Exception ex) SLAM.Reborn.App.LogCrash(ex, "AppDomain_UnhandledException");
       };
@@ -186,6 +197,7 @@ namespace SLAM.Reborn {
     }
     protected override void OnClosed(EventArgs e) {
       _CallbackTimer?.Stop();
+      _KeepAliveTimer?.Stop();
       _SteamClient?.Dispose();
       SAM.API.Steam.Unload();
       base.OnClosed(e);
@@ -502,6 +514,7 @@ namespace SLAM.Reborn {
         _SteamClient.SteamUserStats.RequestUserStats(steamId);
         _SteamClient.SteamUserStats.RequestGlobalAchievementPercentages();
         SharedStatusText.Text = "Fetching stats... don't rush me.";
+        _KeepAliveTimer.Start();
       } catch (Exception ex) {
         DisplayAlert($"Critical error loading game data: {ex.Message}", true);
         SLAM.Reborn.App.LogCrash(ex, "LoadGameData_Critical");
@@ -564,27 +577,7 @@ namespace SLAM.Reborn {
       int locked = total - unlocked;
       if (AchievementProgressBar != null) AchievementProgressBar.Visibility = Visibility.Visible;
       UpdateProgressBar();
-      if (SelectedGamePlayTime != null) {
-        SelectedGamePlayTime.Visibility = Visibility.Collapsed;
-        SelectedGamePlayTime.Text = "";
-        try {
-          string installPath = SAM.API.Steam.GetInstallPath();
-          ulong steamId64 = _SteamClient.SteamUser.GetSteamId();
-          uint accountId = (uint)(steamId64 & 0xFFFFFFFF);
-          var stats = LocalConfigReader.GetAppStats(installPath, accountId, _SelectedGameId);
-          if (stats.PlayTimeMinutes > 0) {
-            double hours = stats.PlayTimeMinutes / 60.0;
-            string text = $"Played: {hours:0.0}h";
-            if (stats.LastPlayedTime > 0) {
-              DateTime lastPlayed = DateTimeOffset.FromUnixTimeSeconds(stats.LastPlayedTime).LocalDateTime;
-              string dateStr = lastPlayed.Date == DateTime.Today ? "Today" : (lastPlayed.Date == DateTime.Today.AddDays(-1) ? "Yesterday" : lastPlayed.ToString("d"));
-              text += $" | Last Played: {dateStr}";
-            }
-            SelectedGamePlayTime.Text = text;
-            SelectedGamePlayTime.Visibility = Visibility.Visible;
-          }
-        } catch { }
-      }
+      UpdatePlayTimeDisplay();
       if (anyProtected) {
         AreModificationsAllowed = false;
         UpdateProtectionState();
@@ -783,6 +776,7 @@ namespace SLAM.Reborn {
         if (WindowVersionText != null) WindowVersionText.Text = $"v{_AppVersion}";
         Title = "SLAM";
         _CallbackTimer.Stop();
+        _KeepAliveTimer.Stop();
         try {
           _SteamClient?.Dispose();
           _SteamClient = null;
@@ -934,6 +928,29 @@ namespace SLAM.Reborn {
         else if (unlocked == 0 && total > 0) SharedStatusText.Text = $"0 down, {total} to go. Do you even play this game?";
         else SharedStatusText.Text = $"{unlocked} out of {total} popped. Standing between me and my nap are the remaining {locked}.";
       }
+    }
+    private void UpdatePlayTimeDisplay() {
+      if (SelectedGamePlayTime == null) return;
+      SelectedGamePlayTime.Visibility = Visibility.Collapsed;
+      SelectedGamePlayTime.Text = "";
+      try {
+        if (_SteamClient == null) return;
+        string installPath = SAM.API.Steam.GetInstallPath();
+        ulong steamId64 = _SteamClient.SteamUser.GetSteamId();
+        uint accountId = (uint)(steamId64 & 0xFFFFFFFF);
+        var stats = LocalConfigReader.GetAppStats(installPath, accountId, _SelectedGameId);
+        if (stats.PlayTimeMinutes > 0) {
+          double hours = stats.PlayTimeMinutes / 60.0;
+          string text = $"Played: {hours:0.0}h";
+          if (stats.LastPlayedTime > 0) {
+            DateTime lastPlayed = DateTimeOffset.FromUnixTimeSeconds(stats.LastPlayedTime).LocalDateTime;
+            string dateStr = lastPlayed.Date == DateTime.Today ? "Today" : (lastPlayed.Date == DateTime.Today.AddDays(-1) ? "Yesterday" : lastPlayed.ToString("d"));
+            text += $" | Last Played: {dateStr}";
+          }
+          SelectedGamePlayTime.Text = text;
+          SelectedGamePlayTime.Visibility = Visibility.Visible;
+        }
+      } catch { }
     }
     private void EnableTimer_Click(object sender, RoutedEventArgs e) {
       IsTimerMode = !IsTimerMode;
