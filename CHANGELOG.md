@@ -1,5 +1,8 @@
 ## Change Log
 
+### 8.X.XX (2026-01-XX)
+- UI: On-brand background image and loader icon.
+
 ### 8.6.14 (2026-01-13)
 - UI: Added Play Time and Last Played under the title of the game in the details view.
 - Core: Implemented a `keep alive` timer to update Steam every 5 minutes, ensuring the total playtime is tracked correctly.

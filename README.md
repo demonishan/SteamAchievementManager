@@ -36,7 +36,9 @@ This isn't just a visual skin; it's a complete modernization of the experience:
 3. **???**
 4. **Profit**
 
-_Note: Steam must be running and you must be logged in._
+_Notes:_
+_- Steam must be running and you must be logged in._
+_- If you are facing any issues with the released version, try the 'Dist' folder, as it might be more updated._
 
 ## Feedback & Contributions
 

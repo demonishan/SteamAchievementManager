@@ -816,11 +816,14 @@ namespace SLAM.Reborn {
         string bgPath = Path.Combine(cacheDir, $"{appId}.jpg");
         string bgUrl = null;
         using (var client = new WebClient()) {
+          client.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
           string url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
           string json = await client.DownloadStringTaskAsync(url);
-          var match = System.Text.RegularExpressions.Regex.Match(json, "\\\"background\\\"\\s*:\\s*\\\"(.*?)\\\"");
-          if (match.Success)
-            bgUrl = match.Groups[1].Value.Replace("\\/", "/");
+          var data = Newtonsoft.Json.Linq.JObject.Parse(json);
+          var gameData = data[appId.ToString()];
+          if (gameData != null && (bool)gameData["success"]) {
+            bgUrl = (string)gameData["data"]?["background"];
+          }
         }
         if (!string.IsNullOrEmpty(bgUrl)) {
           bitmap = await ImageCacheHelper.GetImageAsync(bgUrl, bgPath);
