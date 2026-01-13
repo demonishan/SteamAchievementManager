@@ -15,6 +15,7 @@
     <Resource Include="..\Resources\icon.ico" Link="Resources\icon.ico" />
     <Resource Include="..\Resources\icon.png" Link="Resources\icon.png" />
     <Resource Include="..\Resources\image-not-found.png" Link="Resources\image-not-found.png" />
+    <Resource Include="..\Resources\loader.png" Link="Resources\loader.png" />
     <Resource Include="..\Resources\reload.png" Link="Resources\reload.png" />
   </ItemGroup>
   <PropertyGroup>

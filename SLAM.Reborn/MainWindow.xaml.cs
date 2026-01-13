@@ -93,6 +93,8 @@ namespace SLAM.Reborn {
       }
     }
     private Client _SteamClient;
+    private int _StartPlayTimeMinutes = 0;
+    private DateTime _SessionStartTime = DateTime.MinValue;
     private List<GameInfo> _AllGames = new List<GameInfo>();
     private ObservableCollection<GameViewModel> _FilteredGames = new ObservableCollection<GameViewModel>();
     private bool _WantGames = true;
@@ -151,7 +153,7 @@ namespace SLAM.Reborn {
         catch (Exception ex) { SLAM.Reborn.App.LogCrash(ex, "CallbackTimer_RunCallbacks"); }
       };
       _CallbackTimer.Start();
-      _KeepAliveTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle);
+      _KeepAliveTimer = new DispatcherTimer();
       _KeepAliveTimer.Interval = TimeSpan.FromMinutes(5);
       _KeepAliveTimer.Tick += (s, e) => {
         try {
@@ -265,7 +267,6 @@ namespace SLAM.Reborn {
           }
         } catch { }
       }
-      // await Task.Delay(10);
       if (bitmap != null) {
         await Dispatcher.InvokeAsync(() => {
           try {
@@ -459,6 +460,14 @@ namespace SLAM.Reborn {
           SAM.API.Steam.Unload();
           _SteamClient = new Client();
           _SteamClient.Initialize(_SelectedGameId);
+          try {
+            string installPath = SAM.API.Steam.GetInstallPath();
+            ulong steamId64 = _SteamClient.SteamUser.GetSteamId();
+            uint accountId = (uint)(steamId64 & 0xFFFFFFFF);
+            var stats = LocalConfigReader.GetAppStats(installPath, accountId, _SelectedGameId);
+            _StartPlayTimeMinutes = stats.PlayTimeMinutes;
+            _SessionStartTime = DateTime.Now;
+          } catch { _StartPlayTimeMinutes = 0; _SessionStartTime = DateTime.Now; }
           _UserStatsReceivedCallback = _SteamClient.CreateAndRegisterCallback<SAM.API.UserStatsReceived>();
           _UserStatsReceivedCallback.OnRun += (p) => {
             Dispatcher.Invoke(() => {
@@ -935,18 +944,14 @@ namespace SLAM.Reborn {
       SelectedGamePlayTime.Text = "";
       try {
         if (_SteamClient == null) return;
-        string installPath = SAM.API.Steam.GetInstallPath();
-        ulong steamId64 = _SteamClient.SteamUser.GetSteamId();
-        uint accountId = (uint)(steamId64 & 0xFFFFFFFF);
-        var stats = LocalConfigReader.GetAppStats(installPath, accountId, _SelectedGameId);
-        if (stats.PlayTimeMinutes > 0) {
-          double hours = stats.PlayTimeMinutes / 60.0;
+        int currentPlayTime = _StartPlayTimeMinutes;
+        if (_SessionStartTime != DateTime.MinValue) {
+          currentPlayTime += (int)(DateTime.Now - _SessionStartTime).TotalMinutes;
+        }
+        if (currentPlayTime > 0) {
+          double hours = currentPlayTime / 60.0;
           string text = $"Played: {hours:0.0}h";
-          if (stats.LastPlayedTime > 0) {
-            DateTime lastPlayed = DateTimeOffset.FromUnixTimeSeconds(stats.LastPlayedTime).LocalDateTime;
-            string dateStr = lastPlayed.Date == DateTime.Today ? "Today" : (lastPlayed.Date == DateTime.Today.AddDays(-1) ? "Yesterday" : lastPlayed.ToString("d"));
-            text += $" | Last Played: {dateStr}";
-          }
+          text += " | Last Played: Today";
           SelectedGamePlayTime.Text = text;
           SelectedGamePlayTime.Visibility = Visibility.Visible;
         }

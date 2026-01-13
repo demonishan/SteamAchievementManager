@@ -405,7 +405,7 @@
         </ListView>
         <Grid x:Name="HomeLoadingOverlay" Grid.Row="1" Visibility="Visible">
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="32" Height="32" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+            <Image Source="pack://application:,,,/SLAM;component/Resources/loader.png" Width="64" Height="64" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
               <Image.RenderTransform>
                 <RotateTransform x:Name="HomeRotate" Angle="0"/>
               </Image.RenderTransform>
@@ -847,7 +847,7 @@
           </Grid>
           <Grid x:Name="LoadingOverlay" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-              <Image Source="pack://application:,,,/SLAM;component/Resources/reload.png" Width="32" Height="32" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+              <Image Source="pack://application:,,,/SLAM;component/Resources/loader.png" Width="66" Height="66" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
                 <Image.RenderTransform>
                   <RotateTransform x:Name="Rotate" Angle="0"/>
                 </Image.RenderTransform>
@@ -855,13 +855,13 @@
                   <EventTrigger RoutedEvent="Loaded">
                     <BeginStoryboard>
                       <Storyboard>
-                        <DoubleAnimation Storyboard.TargetName="Rotate" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:1.5" RepeatBehavior="Forever"/>
+                        <DoubleAnimation Storyboard.TargetName="Rotate" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:2.5" RepeatBehavior="Forever"/>
                       </Storyboard>
                     </BeginStoryboard>
                   </EventTrigger>
                 </Image.Triggers>
               </Image>
-              <TextBlock Text="Loading achievements..." Margin="0,15,0,0" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+              <TextBlock Text="Loading achievements..." Margin="0,5,0,0" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
             </StackPanel>
           </Grid>
         </Grid>
