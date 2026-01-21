@@ -353,6 +353,7 @@ namespace SLAM.Reborn {
         SLAM.Reborn.App.LogCrash(ex, "Game_Click");
         HomeView.Visibility = Visibility.Visible;
         GameDetailsView.Visibility = Visibility.Collapsed;
+        IsTimerMode = false;
       }
     }
     private void ClearAchievementSearch_Click(object sender, RoutedEventArgs e) => AchievementSearchBox.Text = string.Empty;
@@ -420,7 +421,6 @@ namespace SLAM.Reborn {
     private void LoadGameData(bool resetFilters = true) {
       try {
         IsTimerMode = false;
-        if (ToggleSearchButton != null) ToggleSearchButton.Visibility = Visibility.Visible;
         if (EnableTimerButton != null) EnableTimerButton.Visibility = Visibility.Visible;
         if (LinksButton != null) LinksButton.Visibility = Visibility.Visible;
         if (RefreshButton != null) RefreshButton.Visibility = Visibility.Visible;
@@ -510,7 +510,6 @@ namespace SLAM.Reborn {
           if (NoAchievementsMessage != null) NoAchievementsMessage.Visibility = Visibility.Visible;
           if (AchievementList != null) AchievementList.Visibility = Visibility.Collapsed;
           if (BulkActionsButton != null) BulkActionsButton.Visibility = Visibility.Collapsed;
-          if (ToggleSearchButton != null) ToggleSearchButton.Visibility = Visibility.Collapsed;
           if (EnableTimerButton != null) EnableTimerButton.Visibility = Visibility.Collapsed;
           if (AchievementSearchRow != null) AchievementSearchRow.Visibility = Visibility.Collapsed;
           if (RefreshButton != null) RefreshButton.Visibility = Visibility.Collapsed;
@@ -660,10 +659,6 @@ namespace SLAM.Reborn {
           if (!string.IsNullOrEmpty(url)) Process.Start(url);
         } catch { }
       }
-    }
-    private void ToggleSearch_Click(object sender, RoutedEventArgs e) {
-      if (AchievementSearchRow.Visibility == Visibility.Visible) AchievementSearchRow.Visibility = Visibility.Collapsed;
-      else AchievementSearchRow.Visibility = Visibility.Visible;
     }
     private void LockAll_Click(object sender, RoutedEventArgs e) {
       foreach (var ach in _Achievements) ach.IsAchieved = false;
@@ -909,7 +904,7 @@ namespace SLAM.Reborn {
     private void UpdateTimerUIState() {
       var visibility = IsTimerMode ? Visibility.Collapsed : Visibility.Visible;
       if (BulkActionsButton != null) BulkActionsButton.Visibility = visibility;
-      if (AchievementSearchRow != null && IsTimerMode) AchievementSearchRow.Visibility = Visibility.Collapsed;
+      if (AchievementSearchRow != null) AchievementSearchRow.Visibility = IsTimerMode ? Visibility.Collapsed : Visibility.Visible;
       if (RefreshButton != null) RefreshButton.Visibility = visibility;
       if (SaveButton != null) SaveButton.Visibility = visibility;
       if (FilterButtonsPanel != null) FilterButtonsPanel.Visibility = visibility;
