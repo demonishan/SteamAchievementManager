@@ -100,6 +100,11 @@
       <TextBlock Grid.Column="1" x:Name="MessageText" Text="Warning message goes here."
         TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#DDDDDD" FontSize="14"
         LineHeight="20" />
+      <CheckBox x:Name="ConfirmCheckBox" Grid.Column="1"
+          Margin="0,15,0,0" VerticalAlignment="Bottom" Foreground="White" FontSize="11"
+          Visibility="Collapsed" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked">
+        <TextBlock Text="I fully understand the severe risks involved. I acknowledge that this action could result in a permanent VAC ban, which will scar my Steam profile for life and cannot be removed. I am willing to accept this permanent mark of shame." TextWrapping="Wrap" Foreground="White"/>
+      </CheckBox>
     </Grid>
     <Grid Grid.Row="2" Background="#20232a" Height="60">
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

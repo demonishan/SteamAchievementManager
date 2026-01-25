@@ -587,10 +587,18 @@ namespace SLAM.Reborn {
       UpdateProgressBar();
       UpdatePlayTimeDisplay();
       if (anyProtected) {
-        AreModificationsAllowed = false;
-        UpdateProtectionState();
-        UpdateStatsMessage();
-        DisplayAlert("These achievements are protected! SLAM is lazy, not magical. Can't touch 'em.", true);
+        var warning = new WarningWindow("These are Protected, and touching them puts your account in serious danger.", "I want to risk it! YOLO!", "I love my Steam profile.", "Protected Achievements", true);
+        warning.ShowDialog();
+        if (warning.IsConfirmed) {
+            foreach (var ach in _Achievements) ach.Permission = 0;
+            AreModificationsAllowed = true;
+            UpdateProtectionState();
+            UpdateStatsMessage();
+        } else {
+            AreModificationsAllowed = false;
+            UpdateProtectionState();
+            UpdateStatsMessage();
+        }
       } else {
         AreModificationsAllowed = true;
         UpdateProtectionState();
@@ -947,8 +955,9 @@ namespace SLAM.Reborn {
           currentPlayTime += (int)(DateTime.Now - _SessionStartTime).TotalMinutes;
         }
         if (currentPlayTime > 0) {
-          double hours = currentPlayTime / 60.0;
-          string text = $"Played: {hours:0.0}h";
+          int hours = currentPlayTime / 60;
+          int minutes = currentPlayTime % 60;
+          string text = minutes == 0 ? $"Played: {hours}h" : $"Played: {hours}h {minutes}m";
           text += " | Last Played: Today";
           SelectedGamePlayTime.Text = text;
           SelectedGamePlayTime.Visibility = Visibility.Visible;
@@ -1343,7 +1352,17 @@ namespace SLAM.Reborn {
         }
       }
     }
-    public int Permission { get; set; }
+    private int _Permission;
+    public int Permission {
+      get => _Permission;
+      set {
+        if (_Permission != value) {
+          _Permission = value;
+          OnPropertyChanged(nameof(Permission));
+          OnPropertyChanged(nameof(IsProtected));
+        }
+      }
+    }
     public bool IsProtected => Permission > 0;
     public bool IsHidden { get; set; }
     public event PropertyChangedEventHandler PropertyChanged;
